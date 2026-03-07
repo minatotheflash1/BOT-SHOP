@@ -3,27 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rider Panel | AURA DELIVERY</title>
+    <title>Rider Dashboard | AURA DELIVERY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
-        .app-container { max-width: 480px; margin: 0 auto; background-color: #0f172a; min-height: 100dvh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #050b14; color: white; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; overflow-x: hidden;}
         
-        /* Animations */
+        .blob { position: absolute; filter: blur(90px); opacity: 0.3; animation: float 15s infinite alternate ease-in-out; pointer-events: none; }
+        .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #10b981; }
+        .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #3b82f6; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         .animate-slide-right { animation: slideInRight 0.3s ease-out forwards; }
 
-        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
         .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; color: white; outline: none; font-size: 16px; }
         .input-box:focus { border-color: #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3); background: rgba(15,23,42,0.9); }
         .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
         .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
-        .nav-tab.active { color: #10b981; border-color: #10b981; }
+        
+        .desktop-tab { transition: all 0.3s; }
+        .desktop-tab.active { background: linear-gradient(90deg, rgba(16,185,129,0.15) 0%, transparent 100%); border-left: 4px solid #10b981; color: #34d399; padding-left: 1.5rem; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
         
@@ -34,36 +39,35 @@
         .badge-gold { background: linear-gradient(135deg, #fbbf24, #b45309); color: #451a03; text-shadow: none; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
         .badge-platinum { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; text-shadow: none; box-shadow: 0 0 15px rgba(226, 232, 240, 0.6); }
         .badge-diamond { background: linear-gradient(135deg, #67e8f9, #0284c7); color: #082f49; text-shadow: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
-        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
         
-        .card-hover { transition: transform 0.2s; } .card-hover:active { transform: scale(0.98); }
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; } .card-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(16,185,129,0.2); }
     </style>
 </head>
-<body>
+<body class="flex flex-col md:flex-row h-screen">
 
-    <div class="app-container sm:border-x sm:border-slate-800">
-        
-        <div id="authSection" class="flex-1 flex flex-col justify-center p-6 w-full animate-slide-up">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+
+    <div id="authSection" class="absolute inset-0 flex flex-col items-center justify-center p-4 z-[100] bg-black/60 backdrop-blur-md animate-slide-up">
+        <div class="w-full max-w-md">
             <div class="text-center mb-8">
-                <div class="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 transform rotate-12">
-                    <i class="fa-solid fa-motorcycle -rotate-12"></i>
-                </div>
-                <h1 class="text-4xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">APP</span></h1>
+                <div class="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl text-slate-900 mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 transform rotate-12"><i class="fa-solid fa-motorcycle -rotate-12"></i></div>
+                <h1 class="text-4xl font-black tracking-tight text-white">RIDER <span class="text-emerald-400">PORTAL</span></h1>
             </div>
 
-            <div class="glass-panel p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
                 <div class="flex gap-6 mb-6 border-b border-slate-700/50">
-                    <button id="loginTab" onclick="switchTab('login')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-active w-1/2 transition-colors">Login</button>
-                    <button id="regTab" onclick="switchTab('reg')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors">Register</button>
+                    <button id="loginTab" onclick="switchAuthTab('login')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-active w-1/2 transition-colors">Login</button>
+                    <button id="regTab" onclick="switchAuthTab('reg')" class="pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors">Register</button>
                 </div>
 
-                <div id="loginForm" class="space-y-4 animate-slide-right">
+                <div id="loginForm" class="space-y-5 animate-slide-right">
                     <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="password" id="lPass" placeholder="Password" class="input-box w-full p-4 rounded-xl font-bold">
                     <button onclick="login()" id="btnLogin" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] mt-4 active:scale-95">Enter App <i class="fa-solid fa-arrow-right ml-2"></i></button>
                 </div>
 
-                <div id="regForm" class="hidden space-y-4">
+                <div id="regForm" class="hidden space-y-5">
                     <input type="text" id="rName" placeholder="Full Name" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="tel" id="rPhone" placeholder="Phone Number" class="input-box w-full p-4 rounded-xl font-bold">
                     <input type="email" id="rEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
@@ -72,73 +76,97 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div id="dashSection" class="hidden flex-col h-[100dvh] w-full animate-slide-up" style="animation-delay: 0.1s; opacity: 0;">
+    <aside id="desktopSidebar" class="hidden md:flex w-72 flex-col glass-panel border-r border-slate-800/80 z-50 h-full p-6">
+        <div class="flex items-center gap-4 mb-12 pl-2">
+            <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-xl text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]"><i class="fa-solid fa-motorcycle"></i></div>
+            <h2 class="text-xl font-black text-white tracking-tighter">AURA <span class="text-emerald-400">RIDER</span></h2>
+        </div>
+        <button onclick="switchDashTab('active')" id="dtab-desk-active" class="desktop-tab active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-box mr-4 text-lg"></i> Active Orders</button>
+        <button onclick="switchDashTab('history')" id="dtab-desk-history" class="desktop-tab text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-clock-rotate-left mr-4 text-lg"></i> History Logs</button>
+        <button onclick="switchDashTab('profile')" id="dtab-desk-profile" class="desktop-tab text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-user mr-4 text-lg"></i> Profile Setup</button>
+        
+        <div class="mt-auto bg-slate-900/50 p-4 rounded-2xl border border-slate-800 text-center">
+            <div id="gpsStatusDesk" class="w-3 h-3 bg-red-500 rounded-full animate-pulse mx-auto mb-2 shadow-[0_0_10px_currentColor]"></div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">GPS Tracking Active</p>
+        </div>
+    </aside>
+
+    <main id="dashSection" class="hidden flex-1 flex-col h-screen relative z-10 w-full">
+        
+        <header class="md:hidden shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
+            <div class="px-5 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatarMob"><i class="fa-solid fa-user-astronaut"></i></div>
+                    <div><h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplayMob">Rider</h2><p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplayMob">Rookie</p></div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="gpsStatusMob" class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_currentColor]"></div>
+                    <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <header class="hidden md:flex shrink-0 bg-transparent border-b border-slate-800/50 px-10 py-6 justify-between items-center z-40 backdrop-blur-md">
+            <div>
+                <h1 class="text-3xl font-black text-white tracking-tight" id="deskTitle">Active Deliveries</h1>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Manage your assigned orders</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right"><h2 class="text-lg font-black text-white" id="riderNameDisplayDesk">Rider Name</h2><p id="riderBadgeDisplayDesk" class="mt-1">Rookie</p></div>
+                <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatarDesk"></div>
+                <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-2.5 rounded-xl font-bold transition-colors"><i class="fa-solid fa-power-off mr-2"></i> Logout</button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-10 pb-24 md:pb-10 relative">
+            <div id="view-active" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-slide-right"></div>
             
-            <div class="shrink-0 bg-slate-900 border-b border-slate-800 shadow-lg z-50">
-                <div class="px-5 py-4 flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-slate-900 overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" id="topAvatar">
-                            <i class="fa-solid fa-user-astronaut"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-black leading-tight text-white" id="riderNameDisplay">Rider</h2>
-                            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-0.5" id="riderBadgeDisplay">Rookie</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div id="gpsStatus" class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_currentColor]"></div>
-                        <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-xl font-bold transition-colors active:scale-95"><i class="fa-solid fa-power-off text-xl"></i></button>
-                    </div>
-                </div>
-            </div>
+            <div id="view-history" class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
 
-            <div class="shrink-0 bg-slate-900/80 border-b border-slate-800 z-40 backdrop-blur-md">
-                <div class="px-2 flex justify-between pt-3">
-                    <button onclick="switchDashTab('active')" id="dtab-active" class="nav-tab active pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-emerald-500 w-1/3 text-center transition-colors">Active</button>
-                    <button onclick="switchDashTab('history')" id="dtab-history" class="nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors">History</button>
-                    <button onclick="switchDashTab('profile')" id="dtab-profile" class="nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors">Profile</button>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto custom-scrollbar relative">
-                <div id="view-active" class="p-4 space-y-4 pb-10 absolute inset-0 w-full animate-slide-right"></div>
-                <div id="view-history" class="p-4 space-y-4 pb-10 hidden absolute inset-0 w-full"></div>
-
-                <div id="view-profile" class="p-6 hidden absolute inset-0 w-full text-center pb-20">
+            <div id="view-profile" class="hidden max-w-2xl mx-auto text-center">
+                <div class="glass-panel p-8 sm:p-12 rounded-[40px] shadow-2xl">
                     <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto flex items-center justify-center text-5xl text-white font-black shadow-[0_0_30px_rgba(16,185,129,0.3)] mb-4 overflow-hidden border-4 border-slate-700" id="profAvatar"></div>
                     <div id="profBadgeHtml" class="mb-4"></div>
                     <h3 class="text-3xl font-black mb-1 text-white" id="profName">Name</h3>
-                    <p class="text-slate-400 font-bold text-sm mb-8" id="profEmail">email</p>
+                    <p class="text-slate-400 font-bold text-sm mb-10" id="profEmail">email</p>
 
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 shadow-inner">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Total Delivered</p>
-                            <p class="text-3xl font-black text-emerald-400" id="profCount">0</p>
+                    <div class="grid grid-cols-2 gap-4 mb-10">
+                        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 shadow-inner">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">Total Delivered</p>
+                            <p class="text-4xl font-black text-emerald-400" id="profCount">0</p>
                         </div>
-                        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 shadow-inner">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Next Rank</p>
-                            <p class="text-base font-black text-blue-400 mt-2" id="profNext">10 left</p>
+                        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 shadow-inner">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">Next Rank</p>
+                            <p class="text-lg font-black text-blue-400 mt-2" id="profNext">10 left</p>
                         </div>
                     </div>
 
-                    <div class="text-left space-y-5 bg-slate-900/60 p-5 rounded-2xl border border-slate-800 shadow-lg">
-                        <h3 class="font-black text-lg text-white mb-2 flex items-center"><i class="fa-solid fa-gear text-emerald-500 mr-2"></i> Settings</h3>
-                        <div class="bg-[rgba(255,255,255,0.02)] p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
-                            <p class="font-bold text-xs text-slate-300">Update Photo</p>
+                    <div class="text-left space-y-5 bg-slate-900/60 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-lg">
+                        <h3 class="font-black text-xl text-white mb-4 flex items-center"><i class="fa-solid fa-gear text-emerald-500 mr-3"></i> Profile Settings</h3>
+                        <div class="bg-[rgba(255,255,255,0.02)] p-5 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                            <p class="font-bold text-sm text-slate-300">Update Photo</p>
                             <div class="upload-btn-wrapper">
-                                <button class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95">Choose</button>
+                                <button class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-500 hover:text-white transition-colors">Choose File</button>
                                 <input type="file" id="fileAvatar" accept="image/*" />
                             </div>
                         </div>
-                        <div><input type="email" id="setEmail" class="input-box w-full p-4 rounded-xl font-bold text-sm" placeholder="Email Address"></div>
-                        <div><input type="password" id="setPass" class="input-box w-full p-4 rounded-xl font-bold text-sm" placeholder="New Password (Optional)"></div>
-                        <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.4)]">Save Profile</button>
+                        <div><input type="email" id="setEmail" class="input-box w-full p-4 rounded-xl font-bold" placeholder="Email Address"></div>
+                        <div><input type="password" id="setPass" class="input-box w-full p-4 rounded-xl font-bold" placeholder="New Password (Optional)"></div>
+                        <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-2 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all">Save Profile Changes</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900/90 border-t border-slate-800 h-[70px] flex justify-around items-center z-50 backdrop-blur-md pb-2">
+            <button onclick="switchDashTab('active')" id="dtab-mob-active" class="text-emerald-400 flex flex-col items-center pt-2 transition-transform"><i class="fa-solid fa-box text-xl mb-1"></i><span class="text-[10px] font-bold">Active</span></button>
+            <button onclick="switchDashTab('history')" id="dtab-mob-history" class="text-slate-500 hover:text-emerald-400 flex flex-col items-center pt-2 transition-colors"><i class="fa-solid fa-clock-rotate-left text-xl mb-1"></i><span class="text-[10px] font-bold">History</span></button>
+            <button onclick="switchDashTab('profile')" id="dtab-mob-profile" class="text-slate-500 hover:text-emerald-400 flex flex-col items-center pt-2 transition-colors"><i class="fa-solid fa-user text-xl mb-1"></i><span class="text-[10px] font-bold">Profile</span></button>
+        </div>
+
+    </main>
 
     <script>
         const swalDark = { background: 'rgba(15,23,42,0.95)', color: '#fff', backdrop: 'rgba(0,0,0,0.8)' };
@@ -147,26 +175,30 @@
 
         if(rider && rider.id) { loadRiderData(); }
 
-        function switchTab(t) {
+        function switchAuthTab(t) {
             const lForm = document.getElementById('loginForm'); const rForm = document.getElementById('regForm');
             lForm.classList.add('hidden'); rForm.classList.add('hidden');
             lForm.classList.remove('animate-slide-right'); rForm.classList.remove('animate-slide-right');
-            
-            document.getElementById('loginTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors'; 
-            document.getElementById('regTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors';
-            
+            document.getElementById('loginTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors'; document.getElementById('regTab').className = 'pb-3 font-bold uppercase text-sm tracking-widest tab-inactive w-1/2 transition-colors';
             if(t === 'login') { lForm.classList.remove('hidden'); void lForm.offsetWidth; lForm.classList.add('animate-slide-right'); document.getElementById('loginTab').classList.replace('tab-inactive', 'tab-active'); }
             else { rForm.classList.remove('hidden'); void rForm.offsetWidth; rForm.classList.add('animate-slide-right'); document.getElementById('regTab').classList.replace('tab-inactive', 'tab-active'); }
         }
 
         function switchDashTab(t) {
+            // Update Desk Tabs
             ['active', 'history', 'profile'].forEach(tab => {
-                const el = document.getElementById('view-'+tab); el.classList.add('hidden'); el.classList.remove('animate-slide-right');
-                document.getElementById('dtab-'+tab).className = 'nav-tab text-slate-500 pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-transparent w-1/3 text-center transition-colors';
+                document.getElementById('view-'+tab).classList.add('hidden'); document.getElementById('view-'+tab).classList.remove('animate-slide-right');
+                document.getElementById('dtab-desk-'+tab).classList.remove('active');
+                document.getElementById('dtab-mob-'+tab).className = 'text-slate-500 hover:text-emerald-400 flex flex-col items-center pt-2 transition-colors';
             });
-            const view = document.getElementById('view-'+t);
-            view.classList.remove('hidden'); void view.offsetWidth; view.classList.add('animate-slide-right');
-            document.getElementById('dtab-'+t).className = 'nav-tab active pb-3 px-2 font-bold text-[11px] uppercase tracking-widest border-b-2 border-emerald-500 w-1/3 text-center text-white transition-colors';
+            
+            const view = document.getElementById('view-'+t); view.classList.remove('hidden'); void view.offsetWidth; view.classList.add('animate-slide-right');
+            document.getElementById('dtab-desk-'+t).classList.add('active');
+            document.getElementById('dtab-mob-'+t).className = 'text-emerald-400 flex flex-col items-center pt-2 transition-transform';
+            
+            const titles = { 'active': 'Active Deliveries', 'history': 'Delivery History', 'profile': 'Rider Profile' };
+            document.getElementById('deskTitle').innerText = titles[t];
+
             if(t === 'active') fetchOrders(); if(t === 'history') fetchHistory();
         }
 
@@ -180,14 +212,12 @@
         }
         function getNextRankInfo(c) { if(c<10) return `${10-c} to Bronze`; if(c<20) return `${20-c} to Silver`; if(c<30) return `${30-c} to Gold`; if(c<50) return `${50-c} to Platinum`; if(c<100) return `${100-c} to Diamond`; return 'Max Rank Achieved!'; }
 
-        function startTracking() {
-            if ("geolocation" in navigator) { sendLoc(); gpsInterval = setInterval(sendLoc, 30000); }
-        }
+        function startTracking() { if ("geolocation" in navigator) { sendLoc(); gpsInterval = setInterval(sendLoc, 30000); } }
         function sendLoc() {
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                document.getElementById('gpsStatus').classList.replace('bg-red-500', 'bg-emerald-500'); 
+                document.getElementById('gpsStatusMob').classList.replace('bg-red-500', 'bg-emerald-500'); document.getElementById('gpsStatusDesk').classList.replace('bg-red-500', 'bg-emerald-500');
                 await fetch('/api/rider/location', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ riderId: rider.id, lat: pos.coords.latitude, lng: pos.coords.longitude }) });
-            }, (err) => { document.getElementById('gpsStatus').classList.replace('bg-emerald-500', 'bg-red-500'); }, { enableHighAccuracy: true });
+            }, (err) => { document.getElementById('gpsStatusMob').classList.replace('bg-emerald-500', 'bg-red-500'); document.getElementById('gpsStatusDesk').classList.replace('bg-emerald-500', 'bg-red-500'); }, { enableHighAccuracy: true });
         }
 
         async function loadRiderData() {
@@ -197,16 +227,14 @@
                 rider = data.rider; localStorage.setItem('riderSession', JSON.stringify(rider));
                 
                 document.getElementById('authSection').style.opacity = 0;
-                setTimeout(() => {
-                    document.getElementById('authSection').classList.add('hidden');
-                    const ds = document.getElementById('dashSection'); ds.classList.remove('hidden'); ds.classList.add('flex');
-                    void ds.offsetWidth; ds.style.opacity = 1;
-                }, 300);
+                setTimeout(() => { document.getElementById('authSection').classList.add('hidden'); const ds = document.getElementById('dashSection'); ds.classList.remove('hidden'); ds.classList.add('flex'); }, 300);
 
-                document.getElementById('riderNameDisplay').innerText = rider.name;
-                const badge = getRiderBadge(rider.deliveryCount); document.getElementById('riderBadgeDisplay').innerText = badge.name;
+                document.getElementById('riderNameDisplayMob').innerText = rider.name; document.getElementById('riderNameDisplayDesk').innerText = rider.name;
+                const badge = getRiderBadge(rider.deliveryCount); document.getElementById('riderBadgeDisplayMob').innerText = badge.name; document.getElementById('riderBadgeDisplayDesk').innerHTML = badge.html;
+                
                 let avHtml = rider.avatar ? `<img src="${rider.avatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user-astronaut text-slate-700"></i>`;
-                document.getElementById('topAvatar').innerHTML = avHtml; document.getElementById('profAvatar').innerHTML = avHtml;
+                document.getElementById('topAvatarMob').innerHTML = avHtml; document.getElementById('topAvatarDesk').innerHTML = avHtml; document.getElementById('profAvatar').innerHTML = avHtml;
+                
                 document.getElementById('profName').innerText = rider.name; document.getElementById('profEmail').innerText = rider.email; document.getElementById('profCount').innerText = rider.deliveryCount; document.getElementById('profBadgeHtml').innerHTML = badge.html; document.getElementById('profNext').innerText = getNextRankInfo(rider.deliveryCount); document.getElementById('setEmail').value = rider.email; base64Avatar = rider.avatar || '';
                 
                 fetchOrders(); startTracking();
@@ -226,62 +254,66 @@
             if(!name || !email || !phone || !password) return; const btn = document.getElementById('btnReg'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
             const res = await fetch('/api/rider/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone, email, password}) }); 
             const data = await res.json(); btn.innerHTML = 'Sign Up';
-            if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } else { Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); } 
+            if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchAuthTab('login'); } else { Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); } 
         }
 
         async function fetchOrders() {
-            const container = document.getElementById('view-active'); container.innerHTML = '<div class="text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Locating Orders...</div>';
+            const container = document.getElementById('view-active'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Locating Orders...</div>';
             try {
                 const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.orders.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-32"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No Pending Orders</h3><p class="text-xs mt-2 font-bold">You are all caught up!</p></div>'; return; }
+                if(data.orders.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-32"><i class="fa-solid fa-box-open text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No Pending Orders</h3><p class="text-xs mt-2 font-bold">You are all caught up!</p></div>'; return; }
                 
                 container.innerHTML = data.orders.map(o => {
                     let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
                     return `
-                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden shadow-lg card-hover">
+                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden shadow-lg card-hover flex flex-col justify-between">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
-                        <div class="flex justify-between items-start mb-5">
-                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p><h3 class="font-black text-xl leading-tight text-white">${o.user.firstName}</h3></div>
-                            <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] active:scale-95 text-xl"><i class="fa-solid fa-phone"></i></a>
+                        <div>
+                            <div class="flex justify-between items-start mb-5">
+                                <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p><h3 class="font-black text-xl leading-tight text-white">${o.user.firstName}</h3></div>
+                                <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] active:scale-95 text-xl"><i class="fa-solid fa-phone"></i></a>
+                            </div>
+                            <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-slate-700/50 mb-5">
+                                <p class="text-sm text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-lg align-middle"></i> ${o.street}, ${o.city} <br><span class="ml-7 text-slate-500 font-mono text-[10px] mt-1 inline-block bg-black/30 px-2 py-0.5 rounded">ZIP: ${o.postcode}</span></p>
+                            </div>
+                            <div class="mb-6 pb-5 border-b border-slate-700/50">
+                                <p class="text-sm font-bold text-slate-200 leading-snug"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded ml-1 mt-2 inline-block">${varStr}</span></p>
+                            </div>
                         </div>
-                        <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-slate-700/50 mb-5">
-                            <p class="text-sm text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2 text-lg align-middle"></i> ${o.street}, ${o.city} <br><span class="ml-7 text-slate-500 font-mono text-[10px] mt-1 inline-block bg-black/30 px-2 py-0.5 rounded">ZIP: ${o.postcode}</span></p>
+                        <div>
+                            <div class="flex justify-between items-end mb-5">
+                                <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash</p><p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p></div>
+                            </div>
+                            <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 text-sm transition-transform"><i class="fa-solid fa-shield-halved mr-2"></i> Deliver & Verify</button>
                         </div>
-                        <div class="mb-6 pb-5 border-b border-slate-700/50">
-                            <p class="text-sm font-bold text-slate-200 leading-snug"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded ml-1 mt-2 inline-block">${varStr}</span></p>
-                        </div>
-                        <div class="flex justify-between items-end mb-5">
-                            <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash</p><p class="text-4xl font-black text-emerald-400 tracking-tight">৳${o.dueCod}</p></div>
-                        </div>
-                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 text-sm transition-transform"><i class="fa-solid fa-shield-halved mr-2"></i> Deliver & Verify</button>
                     </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<div class="text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
+            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
         }
 
         async function fetchHistory() {
-            const container = document.getElementById('view-history'); container.innerHTML = '<div class="text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Loading Logs...</div>';
+            const container = document.getElementById('view-history'); container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold mt-32"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-emerald-500"></i><br>Loading Logs...</div>';
             try {
                 const res = await fetch('/api/rider/history', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({riderId: rider.id}) });
                 const data = await res.json();
-                if(data.history.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 mt-32"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No History</h3></div>'; return; }
+                if(data.history.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-slate-500 mt-32"><i class="fa-solid fa-clock-rotate-left text-6xl mb-4 opacity-20"></i><h3 class="text-xl font-black text-white">No History</h3></div>'; return; }
                 
                 container.innerHTML = data.history.map(o => {
                     const d = new Date(o.createdAt).toLocaleDateString();
                     return `
-                    <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-md card-hover">
+                    <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-md card-hover flex flex-col justify-between">
                         <div class="flex justify-between items-start mb-4">
                             <div><h4 class="font-bold text-lg text-white mb-1">${o.user.firstName}</h4><p class="text-[10px] text-slate-400 font-mono">#${o.id} • ${d}</p></div>
                             <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase"><i class="fa-solid fa-check mr-1"></i> Delivered</span>
                         </div>
-                        <div class="bg-[rgba(255,255,255,0.03)] p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                        <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl flex justify-between items-center border border-slate-700/50 mt-auto">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cash Collected</span>
-                            <span class="text-lg font-black text-emerald-400">৳${o.dueCod}</span>
+                            <span class="text-xl font-black text-emerald-400">৳${o.dueCod}</span>
                         </div>
                     </div>`;
                 }).join('');
-            } catch(e) { container.innerHTML = '<div class="text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
+            } catch(e) { container.innerHTML = '<div class="col-span-full text-center text-red-400 font-bold mt-20">Network Error.</div>'; }
         }
 
         function confirmDelivery(orderId, amount) {
@@ -317,7 +349,7 @@
             const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value;
             document.getElementById('btnSaveSet').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
             const res = await fetch('/api/rider/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({riderId: rider.id, email, password, avatar: base64Avatar}) }); 
-            const data = await res.json(); document.getElementById('btnSaveSet').innerText = "Save Profile";
+            const data = await res.json(); document.getElementById('btnSaveSet').innerText = "Save Profile Changes";
             if(data.success) { Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, ...swalDark}); loadRiderData(); } else Swal.fire('Error', 'Update failed', 'error'); 
         }
 

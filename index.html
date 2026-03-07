@@ -11,36 +11,44 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'bounce-short': 'bounce 0.5s ease-in-out 1', 'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } }
+            theme: { extend: { animation: { 'bounce-short': 'bounce 0.5s ease-in-out 1' } } }
         }
     </script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* 1. Theme Variables for Light/Dark Mode */
+        /* 🔥 FIXED: Theme Variables */
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
-        .dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
+        html.dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
         
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
+        /* 🔥 FIXED: Custom Animations & Keyframes */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+        .animate-slide-right { animation: slideInRight 0.4s ease-out forwards; }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
 
-        /* 3. Splash Screen */
+        /* Splash Screen */
         #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease-out; }
         .spinner { width: 60px; height: 60px; border: 6px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         
-        /* 2. Neon Glow & Glassmorphism */
+        /* Neon Glow & Glassmorphism */
         .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
         .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(100px, 50px); } }
         
-        .glass { background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-        .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .product-card:hover { transform: translateY(-8px); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
+        .glass { background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); transition: background 0.4s, border 0.4s; }
+        .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-8px) scale(1.02); border-color: #3b82f6; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2); }
         
         .drawer-closed { transform: translateX(100%); } .drawer-open { transform: translateX(0); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
@@ -49,19 +57,17 @@
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b); color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569); color: white; }
         
-        /* 🔥 FIXED: VARIANT SELECT DROPDOWN VISIBILITY */
-        .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: all 0.3s ease; cursor: pointer; }
+        .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; cursor: pointer; }
         .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .variant-select option { background-color: var(--card); color: var(--text); font-weight: bold; }
         
-        /* Feature 6: Visual Order Timeline */
+        /* Timeline */
         .timeline-step { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10; position: relative; }
         .t-active { background: #10b981; color: white; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
         .t-inactive { background: var(--border); color: #94a3b8; }
         .t-line { flex: 1; height: 4px; background: var(--border); margin: 0 -5px; z-index: 1; }
         .t-line.active { background: #10b981; }
 
-        /* Floating Action Buttons */
+        /* Floating Buttons */
         .fab { position: fixed; z-index: 45; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .fab:active { transform: scale(0.9); }
         #btnScrollTop { bottom: 90px; right: 20px; background: #3b82f6; color: white; opacity: 0; pointer-events: none; transform: translateY(20px); }
@@ -70,7 +76,9 @@
         @media (min-width: 768px) { #btnScrollTop { bottom: 30px; right: 30px; } #btnFeedback { bottom: 30px; left: 30px; } }
     </style>
 </head>
-<body class="dark"> <div id="splashScreen"><div class="spinner"></div></div>
+<body class="dark">
+
+    <div id="splashScreen"><div class="spinner"></div></div>
 
     <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
@@ -90,47 +98,41 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-yellow-400 transition-colors shadow-inner" title="Toggle Theme">
-                    <i id="themeIcon" class="fa-solid fa-sun"></i>
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-[var(--card)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm hover:scale-105" title="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-sun text-yellow-400"></i>
                 </button>
                 <div id="authSection" class="flex items-center gap-3"></div>
             </div>
         </div>
     </nav>
 
-    <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
-    
+    <button onclick="openFeedback()" id="btnFeedback" class="fab hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(79,70,229,0.6)] animate-slide-up" style="animation-delay: 0.5s;" title="Give Feedback"><i class="fa-solid fa-comment-dots text-xl"></i></button>
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500" title="Scroll to Top"><i class="fa-solid fa-arrow-up"></i></button>
 
-    <div class="pt-10 pb-10 text-center relative z-10 px-4">
-        <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight animate-fade-in">Premium <span class="text-blue-500">Collections</span></h1>
-        
+    <div class="pt-10 pb-10 text-center relative z-10 px-4 animate-slide-up">
+        <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight">Premium <span class="text-blue-500">Collections</span></h1>
         <div class="max-w-xl mx-auto relative group">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-slate-400"></i></div>
-            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products instantly..." class="w-full bg-[var(--card)] border border-[var(--border)] rounded-full pl-12 pr-6 py-4 outline-none focus:border-blue-500 font-bold shadow-lg transition-all text-[var(--text)]">
+            <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search products instantly..." class="w-full bg-[var(--card)] border border-[var(--border)] rounded-full pl-12 pr-6 py-4 outline-none focus:border-blue-500 focus:shadow-[0_0_20px_rgba(59,130,246,0.3)] font-bold shadow-lg transition-all text-[var(--text)]">
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 mb-6 flex justify-end relative z-10">
-        <button onclick="toggleWishlistView()" id="wishlistBtnFilter" class="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm hover:bg-rose-500 hover:text-white transition-colors shadow-sm">
-            <i class="fa-solid fa-heart mr-1"></i> View Wishlist
-        </button>
+    <div class="max-w-7xl mx-auto px-4 mb-6 flex justify-end relative z-10 animate-fade-in" style="animation-delay: 0.2s;">
+        <button onclick="toggleWishlistView()" id="wishlistBtnFilter" class="bg-rose-500/10 text-rose-500 border border-rose-500/30 px-4 py-2 rounded-full font-bold text-sm hover:bg-rose-500 hover:text-white transition-colors shadow-sm"><i class="fa-solid fa-heart mr-1"></i> View Wishlist</button>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10 min-h-[50vh] relative z-10" id="product-list">
-        <div class="product-card p-4 animate-pulse"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
-        <div class="product-card p-4 animate-pulse"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
-        <div class="product-card p-4 animate-pulse hidden sm:block"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
-        <div class="product-card p-4 animate-pulse hidden lg:block"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
+        <div class="product-card p-4 animate-pulse rounded-2xl"><div class="w-full h-56 bg-slate-300 dark:bg-slate-700 rounded-xl mb-4"></div><div class="w-3/4 h-6 bg-slate-300 dark:bg-slate-700 mb-2 rounded"></div><div class="w-1/2 h-8 bg-slate-300 dark:bg-slate-700 rounded"></div></div>
     </div>
 
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[var(--card)] border-t border-[var(--border)] h-[70px] flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.2)] pb-2" id="mobileBottomNav"></div>
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[var(--card)] border-t border-[var(--border)] h-[70px] flex justify-around items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.2)] pb-2 transition-colors" id="mobileBottomNav"></div>
 
-    <div id="quickViewModal" class="fixed inset-0 bg-black/80 hidden z-[100] justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-[var(--card)] w-full max-w-4xl rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-2xl border border-[var(--border)] relative">
+    <div id="quickViewModal" class="fixed inset-0 bg-black/80 hidden z-[100] justify-center items-center p-4 backdrop-blur-md transition-opacity">
+        <div class="bg-[var(--card)] w-full max-w-4xl rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-[var(--border)] relative animate-slide-up">
             <button onclick="closeQuickView()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors z-20"><i class="fa-solid fa-xmark"></i></button>
             <div class="w-full md:w-1/2 h-64 md:h-auto bg-slate-900 flex items-center justify-center p-4 relative" id="qvImageArea"></div>
-            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar bg-[var(--bg)] text-[var(--text)]">
                 <div id="qvDetailsArea"></div>
                 <div id="qvActionArea" class="mt-6 border-t border-[var(--border)] pt-6"></div>
             </div>
@@ -139,24 +141,24 @@
 
     <div id="imageModal" class="fixed inset-0 bg-black/95 hidden z-[110] justify-center items-center flex-col backdrop-blur-md">
         <button onclick="closeGallery()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-red-500 rounded-full text-white text-xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
-        <img id="galleryMainImg" src="" class="max-h-[70vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl mb-6">
+        <img id="galleryMainImg" src="" class="max-h-[70vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl mb-6 animate-fade-in">
         <div id="galleryThumbnails" class="flex gap-4 overflow-x-auto max-w-[90vw] p-2 custom-scrollbar"></div>
     </div>
 
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[var(--card)] border-l border-[var(--border)] z-[80] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-[var(--border)] flex justify-between items-center"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-red-500 hover:text-white transition-colors text-[var(--text)]"><i class="fa-solid fa-xmark"></i></button></div>
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div class="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full hover:bg-red-500 hover:text-white transition-colors text-[var(--text)]"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[var(--bg)] text-[var(--text)]">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
-            <div id="addressSection" class="hidden bg-[var(--bg)] border border-[var(--border)] p-5 rounded-2xl shadow-inner">
+            <div id="addressSection" class="hidden bg-[var(--card)] border border-[var(--border)] p-5 rounded-2xl shadow-sm animate-slide-up">
                 <h3 class="font-black mb-4 uppercase tracking-widest text-xs text-blue-500"><i class="fa-solid fa-truck-fast mr-2"></i> Delivery Details</h3>
                 <div class="space-y-3">
-                    <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
-                    <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
-                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"></div>
+                    <input type="text" id="cPhone" placeholder="Mobile Number" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
+                    <input type="text" id="cStreet" placeholder="House/Street/Village" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors">
+                    <div class="flex gap-2"><input type="text" id="cCity" placeholder="City/District" class="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"><input type="text" id="cZip" placeholder="Postcode" class="w-24 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 text-[var(--text)] transition-colors"></div>
                 </div>
             </div>
         </div>
-        <div class="p-6 border-t border-[var(--border)] bg-[var(--bg)]">
+        <div class="p-6 border-t border-[var(--border)] bg-[var(--card)]">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-sm text-[var(--text)]">Subtotal:</span><span id="cartTotal" class="font-bold text-lg text-[var(--text)]">৳0</span></div>
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-[var(--border)]"><span class="font-bold text-sm text-slate-500">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-500 text-lg">- ৳0</span></div>
             <div class="flex justify-between items-center mb-6"><span class="font-black uppercase tracking-widest text-[var(--text)]">Due (COD):</span><span id="cartDue" class="text-3xl font-black text-blue-500">৳0</span></div>
@@ -165,8 +167,8 @@
     </div>
 
     <div id="profileModal" class="fixed inset-0 bg-black/80 hidden z-[90] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-[var(--card)] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-[var(--border)] shadow-2xl overflow-hidden rounded-[32px]">
-            <div class="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Account</h2><button onclick="closeProfile()" class="w-10 h-10 bg-slate-200 dark:bg-slate-800 text-[var(--text)] hover:bg-red-500 hover:text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="bg-[var(--card)] w-full max-w-2xl max-h-[90vh] flex flex-col relative border border-[var(--border)] shadow-2xl overflow-hidden rounded-[32px] animate-slide-up">
+            <div class="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]"><h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-user text-blue-500 mr-2"></i> Account</h2><button onclick="closeProfile()" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:bg-red-500 hover:text-white rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="flex border-b border-[var(--border)] bg-[var(--card)] px-6 pt-4 gap-6 overflow-x-auto custom-scrollbar"><button onclick="switchProfTab('overview')" id="tab-overview" class="prof-tab active pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap text-blue-500 border-b-2 border-blue-500">Profile</button><button onclick="switchProfTab('orders')" id="tab-orders" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">My Orders</button><button onclick="switchProfTab('funds')" id="tab-funds" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Wallet</button><button onclick="switchProfTab('settings')" id="tab-settings" class="prof-tab text-slate-500 pb-3 font-bold text-sm uppercase tracking-widest whitespace-nowrap border-b-2 border-transparent">Settings</button></div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[var(--bg)] text-[var(--text)]">
                 <div id="sec-overview" class="space-y-6 text-center animate-fade-in">
@@ -175,11 +177,11 @@
                     <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] flex justify-between items-center text-left shadow-sm"><div><p class="text-xs text-slate-500 font-bold uppercase mb-1">Referral Code</p><p class="text-2xl font-mono font-black text-emerald-500" id="pRef">---</p></div><div class="text-right"><span class="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full">Earn ৳100 / Deposit</span></div></div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors"><i class="fa-solid fa-right-from-bracket mr-1"></i> Secure Logout</button>
                 </div>
-                <div id="sec-orders" class="hidden space-y-4 animate-fade-in"><div id="pOrdersList"></div></div>
-                <div id="sec-funds" class="hidden space-y-4 animate-fade-in"><div id="pFundsList"></div></div>
-                <div id="sec-settings" class="hidden space-y-5 text-left animate-fade-in">
+                <div id="sec-orders" class="hidden space-y-4 animate-slide-right"><div id="pOrdersList"></div></div>
+                <div id="sec-funds" class="hidden space-y-4 animate-slide-right"><div id="pFundsList"></div></div>
+                <div id="sec-settings" class="hidden space-y-5 text-left animate-slide-right">
                     <h3 class="font-black text-xl mb-4">Edit Profile</h3>
-                    <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-900 border border-[var(--border)]" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/10 text-blue-500 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
+                    <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] flex justify-between items-center"><div class="flex items-center gap-4"><div class="w-16 h-16 rounded-full overflow-hidden bg-[var(--bg)] border border-[var(--border)]" id="settingAvatarPreview"></div><div><p class="font-bold text-sm">Profile Picture</p><div class="upload-btn-wrapper mt-1"><button class="bg-blue-600/10 text-blue-500 px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">Choose Image</button><input type="file" id="fileAvatar" accept="image/*" /></div></div></div><button onclick="removeAvatar()" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
                     <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Email</label><input type="email" id="setEmail" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
                     <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Password</label><input type="password" id="setPass" placeholder="Leave blank to keep current" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors"></div>
                     <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase mt-4 shadow-lg active:scale-95 transition-transform">Save Changes</button>
@@ -189,10 +191,10 @@
     </div>
 
     <div id="fundModal" class="fixed inset-0 bg-black/80 hidden z-[95] justify-center items-center px-4 backdrop-blur-sm">
-        <div class="bg-[var(--card)] rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden border border-[var(--border)] animate-fade-in">
+        <div class="bg-[var(--card)] rounded-[32px] w-full max-w-md shadow-2xl relative overflow-hidden border border-[var(--border)] animate-slide-up">
             <div id="fundHeader" class="p-6 flex justify-between items-center text-white shadow-md bg-[#e2136e] transition-colors duration-300"><h2 class="text-2xl font-black"><i id="fundIcon" class="fa-solid fa-paper-plane mr-2"></i> Add Balance</h2><button onclick="closeFund()" class="w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
             <form id="depositForm" class="p-6 space-y-5 bg-[var(--bg)] text-[var(--text)]">
-                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#e2136e] peer-checked:text-[#e2136e] peer-checked:bg-[#e2136e]/10 text-xs uppercase tracking-widest transition-all">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#f37021] peer-checked:text-[#f37021] peer-checked:bg-[#f37021]/10 text-xs uppercase tracking-widest transition-all">Nagad</div></label></div></div>
+                <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-3 ml-1">Select Method</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="method" value="bkash" class="peer sr-only" checked onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#e2136e] peer-checked:text-[#e2136e] peer-checked:bg-[#e2136e]/10 text-xs uppercase tracking-widest transition-all bg-[var(--card)]">bKash</div></label><label class="cursor-pointer"><input type="radio" name="method" value="nagad" class="peer sr-only" onchange="updateFundUI()"><div class="py-3 text-center border-2 border-[var(--border)] rounded-xl font-black text-slate-500 peer-checked:border-[#f37021] peer-checked:text-[#f37021] peer-checked:bg-[#f37021]/10 text-xs uppercase tracking-widest transition-all bg-[var(--card)]">Nagad</div></label></div></div>
                 <div><label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Amount (৳)</label><input type="number" id="fBdt" required class="w-full bg-[var(--card)] border border-[var(--border)] text-emerald-500 rounded-xl px-4 py-3 font-black text-xl outline-none focus:border-blue-500 transition-colors"></div>
                 <div class="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] shadow-sm"><p class="text-xs font-black text-slate-500 uppercase mb-2">Send Money To:</p><div onclick="copyNumber()" class="bg-[var(--bg)] border border-[var(--border)] px-4 py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors"><span id="fNumber" class="font-mono text-xl font-black tracking-widest">01846849460</span><i class="fa-regular fa-copy text-blue-500"></i></div></div>
                 <div class="space-y-3"><input type="text" id="fSender" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-blue-500 transition-colors" placeholder="Sender Number"><input type="text" id="fTrx" required class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-black uppercase tracking-widest outline-none focus:border-blue-500 transition-colors" placeholder="TrxID"></div>
@@ -202,42 +204,50 @@
     </div>
 
     <script>
-        // ✅ DEFINED TOAST FUNCTION TO PREVENT ERRORS
         const toast = (icon, title) => Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 1500, background: 'var(--card)', color: 'var(--text)' });
-        
         const swalDark = { background: 'var(--card)', color: 'var(--text)', backdrop: 'rgba(0,0,0,0.8)' };
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
         let allProducts = []; let cart = []; let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]'); let base64Avatar = ''; let showOnlyWishlist = false;
 
-        // 1. Theme Logic
-        function toggleTheme() {
-            const html = document.documentElement;
-            if(html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); document.getElementById('themeIcon').className = 'fa-solid fa-moon'; } 
-            else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; }
+        // Theme Management
+        function applyTheme() {
+            const isLight = localStorage.getItem('theme') === 'light';
+            if (isLight) {
+                document.documentElement.classList.remove('dark');
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.className = 'fa-solid fa-moon text-slate-700';
+            } else {
+                document.documentElement.classList.add('dark');
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.className = 'fa-solid fa-sun text-yellow-400';
+            }
         }
-        if(localStorage.getItem('theme') === 'light') { document.documentElement.classList.remove('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-moon'; }
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            applyTheme();
+        }
+        applyTheme(); // Run on load
 
-        // 3. Hide Splash Screen & 7. Start Flash Sale
         window.addEventListener('load', () => { 
             setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',600); }, 800);
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
             startFlashSaleTimer();
         });
 
-        // 7. Countdown Timer
         function startFlashSaleTimer() {
             let time = 3600 * 5; 
             setInterval(() => {
                 let h = Math.floor(time / 3600); let m = Math.floor((time % 3600) / 60); let s = time % 60;
-                document.getElementById('countdownTimer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                const el = document.getElementById('countdownTimer');
+                if(el) el.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 time > 0 ? time-- : time = 3600*5;
             }, 1000);
         }
 
-        // 10. Scroll to Top logic
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('btnScrollTop');
-            if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible');
+            if(btn) { if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); }
         });
 
         function getBadge(role) { return role === 'ADMIN' ? '<span class="r-badge badge-admin">ADMIN</span>' : '<span class="r-badge badge-basic">USER</span>'; }
@@ -263,8 +273,8 @@
             const authDiv = document.getElementById('authSection'); const mobNav = document.getElementById('mobileBottomNav');
             if(user) {
                 const uName = user.name || user.firstName || 'User'; let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`; let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
-                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center relative pt-2"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden animate-bounce-short">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center pt-2"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center pt-2"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-4 py-2 rounded-full font-bold text-sm hidden sm:block hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><div class="hidden sm:flex items-center bg-[var(--card)] border border-[var(--border)] px-4 py-1.5 rounded-full font-black shadow-sm"><span class="mr-2 pr-2 border-r border-[var(--border)] text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-500">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden hover:opacity-80 transition-opacity">${avHtml}</button>`;
+                mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 hover:text-blue-500 flex flex-col items-center relative pt-2 transition-colors active:scale-95"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 hover:text-blue-500 flex flex-col items-center pt-2 transition-colors active:scale-95"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-500 transition-colors active:scale-95">Login</button>`;
                 mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Login / Register</button>`;
@@ -277,7 +287,6 @@
             catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-500 font-bold py-10">Error loading.</div>'; } 
         }
 
-        // 4. Wishlist Logic
         function toggleWishlist(id) {
             if(wishlist.includes(id)) { wishlist = wishlist.filter(w=>w!==id); toast('info','Removed from Wishlist'); } 
             else { wishlist.push(id); toast('success','Added to Wishlist ❤️'); }
@@ -292,7 +301,6 @@
             renderProducts(showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts);
         }
 
-        // 5. Quick View Logic
         function openQuickView(id) {
             const p = allProducts.find(x=>x.id===id); if(!p) return;
             const img = (p.imageIds && p.imageIds.length>0) ? `/api/photo/${p.imageIds[0]}` : 'https://placehold.co/400x400';
@@ -308,14 +316,12 @@
             document.getElementById('quickViewModal').classList.replace('hidden', 'flex');
         }
         function closeQuickView() { document.getElementById('quickViewModal').classList.replace('flex','hidden'); }
-        
         function addToCartQV(id, name, price) {
             let sEl = document.getElementById(`qv-sz`); let cEl = document.getElementById(`qv-cl`); let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
             if(sEl && !size) return toast('warning', 'Please select a Size!'); if(cEl && !color) return toast('warning', 'Please select a Color!');
             addToCartDirect(id, name, price, size, color); closeQuickView();
         }
 
-        // 9. Social Share
         function shareProduct(id, name) {
             if (navigator.share) { navigator.share({ title: name, url: window.location.href }); } 
             else { navigator.clipboard.writeText(window.location.href); toast('success', 'Link Copied!'); }
@@ -323,9 +329,9 @@
 
         function renderProducts(list) {
             const container = document.getElementById('product-list');
-            if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No items available.</div>';
+            if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10"><i class="fa-solid fa-box-open text-4xl mb-3 opacity-50"></i><br>No items found.</div>';
             
-            container.innerHTML = list.map(p => {
+            container.innerHTML = list.map((p, index) => {
                 let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="sz-${p.id}" class="variant-select"><option value="">Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
                 let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select mt-2"><option value="">Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
                 let variantHtml = (sizeOpts || colorOpts) ? `<div class="mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold h-9 flex items-center">Standard Item</div>`;
@@ -338,15 +344,15 @@
                 let imgHtml = mainImage ? `<img src="/api/photo/${mainImage}" onclick="openQuickView(${p.id})" onerror="this.src='https://placehold.co/400x400'" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex justify-center items-center"><i class="fa-solid fa-box text-5xl text-slate-400"></i></div>`;
                 
                 let wClass = wishlist.includes(p.id) ? "text-rose-500 bg-rose-500/10 border-rose-500/30" : "text-slate-400 hover:text-rose-500 bg-[var(--card)] border-[var(--border)]";
-                let viewers = Math.floor(Math.random() * 20) + 5; // 8. Fake live viewers
+                let viewers = Math.floor(Math.random() * 20) + 5; 
+                let animDelay = (index * 0.1) > 0.5 ? 0.5 : (index * 0.1); // Stagger animation
 
                 return `
-                <div class="product-card p-4 flex flex-col justify-between relative group rounded-2xl animate-fade-in shadow-sm">
-                    <div class="absolute top-6 right-6 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="product-card p-4 flex flex-col justify-between relative group rounded-2xl animate-slide-up shadow-sm" style="animation-delay: ${animDelay}s; opacity: 0;">
+                    <div class="absolute top-6 right-6 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button onclick="toggleWishlist(${p.id})" class="w-8 h-8 rounded-full flex justify-center items-center shadow border transition-colors ${wClass}"><i class="fa-solid fa-heart text-xs"></i></button>
                         <button onclick="shareProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')" class="w-8 h-8 bg-[var(--card)] rounded-full flex justify-center items-center shadow border border-[var(--border)] text-blue-500 hover:text-white hover:bg-blue-500 transition-colors"><i class="fa-solid fa-share-nodes text-xs"></i></button>
                     </div>
-
                     <div>
                         <div class="w-full h-48 bg-[var(--bg)] rounded-xl mb-4 overflow-hidden relative shadow-inner">
                             ${imgHtml}
@@ -365,16 +371,23 @@
             }).join('');
         }
 
-        // Live Search
         function filterProducts() { 
             const q = document.getElementById('searchInput').value.toLowerCase(); 
             let list = showOnlyWishlist ? allProducts.filter(p=>wishlist.includes(p.id)) : allProducts;
             renderProducts(list.filter(p => p.name.toLowerCase().includes(q))); 
         }
 
-        // Cart Actions
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('drawer-closed'); document.getElementById('cartDrawer').classList.toggle('drawer-open'); }
-        function updateCartBadge() { const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); if(!cDesk || !cMob) return; if(cart.length > 0) { cDesk.innerText = cart.length; cMob.innerText = cart.length; cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); cMob.classList.remove('animate-bounce-short'); void cMob.offsetWidth; cMob.classList.add('animate-bounce-short'); } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } }
+        function updateCartBadge() { 
+            const cDesk = document.getElementById('cartCountDesk'); const cMob = document.getElementById('cartCountMob'); 
+            if(!cDesk || !cMob) return; 
+            if(cart.length > 0) { 
+                cDesk.innerText = cart.length; cMob.innerText = cart.length; 
+                cDesk.classList.remove('hidden'); cMob.classList.remove('hidden'); 
+                cDesk.classList.remove('animate-bounce-short'); void cDesk.offsetWidth; cDesk.classList.add('animate-bounce-short'); 
+                cMob.classList.remove('animate-bounce-short'); void cMob.offsetWidth; cMob.classList.add('animate-bounce-short'); 
+            } else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); } 
+        }
 
         function addToCartUI(id, name, price) {
             if(!user) return location.href='/login';
@@ -398,7 +411,7 @@
         
         function renderCart() {
             const container = document.getElementById('cartItemsContainer');
-            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-30"></i><br><p class="font-bold text-sm">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
+            if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10 animate-fade-in"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-30"></i><br><p class="font-bold text-sm">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
             document.getElementById('addressSection').classList.remove('hidden'); 
             let sum = 0; 
             container.innerHTML = cart.map(i => { 
@@ -423,14 +436,12 @@
             } catch(e) { Swal.fire('Error', 'Network Error', 'error'); }
         }
 
-        // 13. FIXED Feedback Function (Async Background Processing)
         async function openFeedback() {
-            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', {background:'var(--card)', color:'var(--text)'});
+            if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info');
             const { value: formValues } = await Swal.fire({
                 title: 'Send Feedback',
                 html: `<input id="fb-sub" class="swal2-input !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)]" placeholder="Subject (e.g. Bug / UI)"><textarea id="fb-msg" class="swal2-textarea !bg-[var(--bg)] !text-[var(--text)] !border-[var(--border)] custom-scrollbar" placeholder="Write your message here..."></textarea>`,
-                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5',
-                background:'var(--card)', color:'var(--text)',
+                focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Submit', confirmButtonColor: '#4f46e5', background:'var(--card)', color:'var(--text)',
                 preConfirm: () => {
                     const sub = document.getElementById('fb-sub').value; const msg = document.getElementById('fb-msg').value;
                     if(!sub || !msg) { Swal.showValidationMessage('Both fields required!'); return false; }
@@ -446,7 +457,6 @@
         function openGallery(productId) { const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return; const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails'); mainImg.src = `/api/photo/${p.imageIds[0]}`; thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join(''); modal.classList.replace('hidden', 'flex'); }
         function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
 
-        // Profile & Order Timeline logic
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; base64Avatar = user.avatar || '';
@@ -457,29 +467,17 @@
             document.getElementById('profileModal').classList.replace('hidden', 'flex'); switchProfTab(defaultTab);
             
             fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { 
-                document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
+                document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10 animate-fade-in">No orders yet.</p>' : data.map(p => {
                     let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor); let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
-                    
-                    // 6. Visual Order Timeline Builder
                     let tlStep = 1; if(p.status==='RECEIVED') tlStep=2; else if(p.status==='SHIPPED') tlStep=3; else if(p.status==='DELIVERED') tlStep=4;
-                    let timeline = `
-                    <div class="flex items-center justify-between w-full mt-5 px-2">
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=1?'t-active':'t-inactive'}"><i class="fa-solid fa-clipboard-list"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=1?'text-emerald-500':'text-slate-500'}">PENDING</span></div>
-                        <div class="t-line ${tlStep>=2?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=2?'t-active':'t-inactive'}"><i class="fa-solid fa-box-open"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=2?'text-emerald-500':'text-slate-500'}">RECEIVED</span></div>
-                        <div class="t-line ${tlStep>=3?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=3?'t-active':'t-inactive'}"><i class="fa-solid fa-truck-fast"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=3?'text-emerald-500':'text-slate-500'}">SHIPPED</span></div>
-                        <div class="t-line ${tlStep>=4?'active':''}"></div>
-                        <div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=4?'t-active':'t-inactive'}"><i class="fa-solid fa-check"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=4?'text-emerald-500':'text-slate-500'}">DONE</span></div>
-                    </div>`;
-
-                    return `<div class="bg-[var(--card)] border border-[var(--border)] p-5 rounded-3xl mb-4 shadow-sm"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-sm text-[var(--text)]">${p.product.name} <span class="text-blue-500 text-[10px] ml-1 bg-blue-500/10 px-1 rounded">${varStr}</span></h4><p class="text-[10px] text-slate-500 mt-1">ID: #${p.id} • ${new Date(p.createdAt).toLocaleDateString()}</p></div><span class="text-xs font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">৳${p.priceTotal}</span></div>${timeline}</div>`;
+                    let timeline = `<div class="flex items-center justify-between w-full mt-5 px-2"><div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=1?'t-active':'t-inactive'}"><i class="fa-solid fa-clipboard-list"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=1?'text-emerald-500':'text-slate-500'}">PENDING</span></div><div class="t-line ${tlStep>=2?'active':''}"></div><div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=2?'t-active':'t-inactive'}"><i class="fa-solid fa-box-open"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=2?'text-emerald-500':'text-slate-500'}">RECEIVED</span></div><div class="t-line ${tlStep>=3?'active':''}"></div><div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=3?'t-active':'t-inactive'}"><i class="fa-solid fa-truck-fast"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=3?'text-emerald-500':'text-slate-500'}">SHIPPED</span></div><div class="t-line ${tlStep>=4?'active':''}"></div><div class="flex flex-col items-center"><div class="timeline-step ${tlStep>=4?'t-active':'t-inactive'}"><i class="fa-solid fa-check"></i></div><span class="text-[9px] mt-1 font-bold ${tlStep>=4?'text-emerald-500':'text-slate-500'}">DONE</span></div></div>`;
+                    return `<div class="bg-[var(--card)] border border-[var(--border)] p-5 rounded-3xl mb-4 shadow-sm animate-slide-right"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-sm text-[var(--text)]">${p.product.name} <span class="text-blue-500 text-[10px] ml-1 bg-blue-500/10 px-1 rounded">${varStr}</span></h4><p class="text-[10px] text-slate-500 mt-1">ID: #${p.id} • ${new Date(p.createdAt).toLocaleDateString()}</p></div><span class="text-xs font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">৳${p.priceTotal}</span></div>${timeline}</div>`;
                 }).join(''); 
             });
-            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--card)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3 shadow-sm"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
+            fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10 animate-fade-in">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-[var(--card)] p-4 rounded-2xl flex justify-between items-center border border-[var(--border)] mb-3 shadow-sm animate-slide-right"><div><p class="font-black text-sm uppercase text-[var(--text)]">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-500 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-500 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });
         }
         function closeProfile() { document.getElementById('profileModal').classList.replace('flex', 'hidden'); }
-        function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500', 'border-blue-500'); b.classList.add('text-slate-500', 'border-transparent'); }); document.getElementById('tab-'+tab).classList.add('active', 'text-blue-500', 'border-blue-500'); document.getElementById('tab-'+tab).classList.remove('text-slate-500', 'border-transparent'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); document.getElementById('sec-'+tab).classList.remove('hidden'); }
+        function switchProfTab(tab) { document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500', 'border-blue-500'); b.classList.add('text-slate-500', 'border-transparent'); }); const activeTab = document.getElementById('tab-'+tab); activeTab.classList.add('active', 'text-blue-500', 'border-blue-500'); activeTab.classList.remove('text-slate-500', 'border-transparent'); document.getElementById('sec-overview').classList.add('hidden'); document.getElementById('sec-orders').classList.add('hidden'); document.getElementById('sec-funds').classList.add('hidden'); document.getElementById('sec-settings').classList.add('hidden'); const view = document.getElementById('sec-'+tab); view.classList.remove('hidden'); void view.offsetWidth; view.classList.add('animate-slide-right'); }
         
         document.getElementById('fileAvatar').addEventListener('change', function(e) {
             const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
@@ -493,7 +491,6 @@
         async function saveSettings() { const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value; const btn = document.getElementById('btnSaveSet'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar}) }); const data = await res.json(); btn.innerText = "Save Changes"; if(data.success) { user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); toast('success', 'Saved!'); openProfileDashboard('overview'); renderAuth(); } else Swal.fire('Error', data.error, 'error'); }
         function removeAvatar() { base64Avatar = ''; document.getElementById('settingAvatarPreview').innerHTML = `<span class="text-2xl font-black text-slate-500">${user.firstName.charAt(0).toUpperCase()}</span>`; saveSettings(); }
 
-        // Fund logic
         function openFund() { if(!user) return location.href='/login'; document.getElementById('fundModal').classList.replace('hidden', 'flex'); document.getElementById('fBdt').value = ''; updateFundUI(); }
         function closeFund() { document.getElementById('fundModal').classList.replace('flex', 'hidden'); }
         function updateFundUI() { const method = document.querySelector('input[name="method"]:checked').value; const header = document.getElementById('fundHeader'); const btn = document.getElementById('fBtn'); const icon = document.getElementById('fundIcon'); let num = ''; header.className = 'p-6 flex justify-between items-center text-white shadow-md transition-colors duration-300'; btn.className = 'w-full text-white font-black py-4 rounded-xl uppercase tracking-widest transition-all'; if(method === 'bkash') { num = '01846849460'; header.classList.replace('bg-[#f37021]','bg-[#e2136e]'); header.classList.add('bg-[#e2136e]'); btn.classList.add('bg-[#e2136e]', 'hover:bg-[#b30b54]'); icon.className = 'fa-solid fa-paper-plane mr-2'; } else if(method === 'nagad') { num = '01846849460'; header.classList.replace('bg-[#e2136e]','bg-[#f37021]'); header.classList.add('bg-[#f37021]'); btn.classList.add('bg-[#f37021]', 'hover:bg-[#d65b15]'); icon.className = 'fa-solid fa-fire mr-2'; } document.getElementById('fNumber').innerText = num; }

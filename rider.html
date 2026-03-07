@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rider Panel | AURA DELIVERY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; -webkit-font-smoothing: antialiased; }
+        .glass-panel { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow-input:focus { border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); outline: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <div id="loginSection" class="w-full max-w-sm mt-20">
+        <div class="text-center mb-10">
+            <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-white mx-auto shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-4">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <h1 class="text-3xl font-black tracking-tight">RIDER <span class="text-emerald-400">ACCESS</span></h1>
+            <p class="text-slate-400 text-sm mt-2">Enter rider PIN to view deliveries.</p>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl shadow-2xl">
+            <input type="password" id="riderPass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 font-black text-center text-2xl tracking-[0.5em] glow-input mb-4" placeholder="••••">
+            <button onclick="login()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest transition-colors shadow-lg">Authenticate</button>
+        </div>
+    </div>
+
+    <div id="dashSection" class="w-full max-w-md hidden flex-col h-full">
+        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6 shadow-lg sticky top-4 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-motorcycle"></i></div>
+                <div>
+                    <h2 class="font-black leading-tight">Deliveries</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Orders</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-red-500 p-2 hover:bg-slate-800 rounded-lg transition-colors"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+
+        <div id="ordersContainer" class="space-y-4 pb-10">
+            <p class="text-center text-slate-500 font-bold mt-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><br>Loading Deliveries...</p>
+        </div>
+    </div>
+
+    <script>
+        const swalDark = { background: '#1e293b', color: '#fff' };
+        let pass = sessionStorage.getItem('riderPass');
+        
+        if(pass) fetchOrders();
+
+        async function login() { 
+            pass = document.getElementById('riderPass').value; 
+            const btn = document.querySelector('button'); btn.innerText = "Checking...";
+            const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); 
+            btn.innerText = "AUTHENTICATE";
+            if(res.ok) { sessionStorage.setItem('riderPass', pass); fetchOrders(); } 
+            else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Invalid PIN'}); } 
+        }
+
+        async function fetchOrders() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashSection').classList.remove('hidden');
+            document.getElementById('dashSection').classList.add('flex');
+
+            try {
+                const res = await fetch('/api/rider/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) });
+                const data = await res.json();
+                
+                if(!data.success) { logout(); return; }
+
+                const container = document.getElementById('ordersContainer');
+                if(data.orders.length === 0) {
+                    container.innerHTML = '<div class="text-center text-slate-500 mt-20"><i class="fa-solid fa-box-open text-5xl mb-4 opacity-50"></i><h3 class="text-xl font-black">No Active Deliveries</h3><p class="text-sm">You have delivered all shipped orders.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = data.orders.map(o => {
+                    let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor);
+                    let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
+
+                    return `
+                    <div class="glass-panel p-5 rounded-3xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Order #${o.id}</p>
+                                <h3 class="font-black text-lg leading-tight">${o.user.firstName}</h3>
+                            </div>
+                            <a href="tel:${o.phone}" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-transform active:scale-95"><i class="fa-solid fa-phone"></i></a>
+                        </div>
+
+                        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700 mb-4">
+                            <p class="text-xs text-slate-300 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-2"></i> ${o.street}, ${o.city} - ${o.postcode}</p>
+                        </div>
+
+                        <div class="mb-5 pb-4 border-b border-slate-700">
+                            <p class="text-sm font-bold text-slate-200"><i class="fa-solid fa-box text-blue-400 mr-2"></i> ${o.product ? o.product.name : 'Unknown Product'} <span class="text-[10px] text-slate-400 font-normal ml-1">${varStr}</span></p>
+                        </div>
+
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Collect Cash (COD)</p>
+                                <p class="text-3xl font-black text-emerald-400">৳${o.dueCod}</p>
+                            </div>
+                        </div>
+
+                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-check-double mr-2"></i> Mark Delivered</button>
+                    </div>`;
+                }).join('');
+
+            } catch(e) {
+                document.getElementById('ordersContainer').innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>';
+            }
+        }
+
+        function confirmDelivery(id, amount) {
+            Swal.fire({
+                title: 'Confirm Delivery?',
+                html: `Did you receive exactly <b class="text-emerald-400 text-xl">৳${amount}</b> from the customer?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, Delivered!',
+                ...swalDark
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+                    const res = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id}) });
+                    const data = await res.json();
+                    if(data.success) {
+                        Swal.fire({title: 'Success!', text: 'Order marked as Delivered.', icon: 'success', ...swalDark});
+                        fetchOrders(); // Refresh list
+                    } else {
+                        Swal.fire('Error', 'Failed to update order.', 'error', ...swalDark);
+                    }
+                }
+            });
+        }
+
+        function logout() { sessionStorage.removeItem('riderPass'); location.reload(); }
+    </script>
+</body>
+</html>

@@ -48,16 +48,18 @@ model User {
   createdAt          DateTime   @default(now())
 }
 
-// 🔥 NEW RIDER MODEL
+// 🔥 UPDATED RIDER MODEL WITH AVATAR & BADGE STATS
 model Rider {
-  id          Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  phone       String
-  password    String
-  isVerified  Boolean  @default(false)
-  verifyToken String?
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  phone         String
+  password      String
+  avatar        String?  
+  deliveryCount Int      @default(0) 
+  isVerified    Boolean  @default(false)
+  verifyToken   String?
+  createdAt     DateTime @default(now())
 }
 
 model Promo {
@@ -96,7 +98,7 @@ model Purchase {
   postcode      String?  
   status        String   @default("PENDING") 
   deliveryOtp   String?  
-  deliveredBy   String?  // 🔥 Track which rider delivered
+  deliveredBy   String?  
   createdAt     DateTime @default(now())
 }
 

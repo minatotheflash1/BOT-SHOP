@@ -72,6 +72,7 @@ bot.action(/deliver_(.+)/, async (ctx) => { await prisma.purchase.update({ where
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA DIGITAL STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
 
+// 🔥 REGISTRATION API WITH TELEGRAM LOG
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password, country, refCode } = req.body;
@@ -84,6 +85,11 @@ app.post('/api/register', async (req, res) => {
         const verifyToken = crypto.randomBytes(32).toString('hex');
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode(), referredBy, ipAddress: ip, verifyToken, isVerified: false } });
         
+        // 👉 SEND TELEGRAM LOG FOR NEW REGISTER
+        if(ADMIN_ID) {
+            bot.telegram.sendMessage(ADMIN_ID, `🆕 *NEW USER REGISTERED*\n\n👤 *Name:* ${name}\n📧 *Email:* ${email}\n🌍 *Country:* ${country}\n🌐 *IP Address:* \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
+        }
+
         const host = req.headers['x-forwarded-host'] || req.get('host');
         const verifyLink = `https://${host}/api/verify-email/${verifyToken}`;
         
@@ -101,6 +107,30 @@ app.get('/api/verify-email/:token', async (req, res) => {
     if (!user) return res.status(400).send('<h2 style="color:#ef4444;text-align:center;margin-top:20%;">❌ Invalid Token!</h2>');
     await prisma.user.update({ where: { id: user.id }, data: { isVerified: true, verifyToken: null } });
     res.send('<h2 style="color:#10b981;text-align:center;margin-top:20%;">✅ Verified! Redirecting...</h2><script>setTimeout(()=>window.location.href="/login", 2000);</script>');
+});
+
+// 🔥 LOGIN API WITH TELEGRAM LOG
+app.post('/api/login', async (req, res) => {
+    try {
+        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; if(ip && ip.includes(',')) ip = ip.split(',')[0];
+        const user = await prisma.user.findUnique({ where: { email: req.body.email } });
+        
+        if (user && user.password === req.body.password) { 
+            if(user.isBanned) return res.status(403).json({ success: false, error: 'Banned' }); 
+            if(!user.isVerified) return res.status(403).json({ success: false, error: 'Please verify your email.' }); 
+
+            // 👉 SEND TELEGRAM LOG FOR LOGIN
+            if(ADMIN_ID) {
+                bot.telegram.sendMessage(ADMIN_ID, `🔑 *USER LOGGED IN*\n\n👤 *Name:* ${user.firstName}\n📧 *Email:* ${user.email}\n💰 *Wallet:* ৳${user.balanceBdt}\n🌐 *IP Address:* \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
+            }
+
+            res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, refCode: user.refCode, role: user.role, avatar: user.avatar, refCount: user.refCount } }); 
+        } else {
+            res.status(401).json({ success: false, error: 'Invalid credentials' }); 
+        }
+    } catch(e) {
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
 });
 
 app.post('/api/checkout', async (req, res) => {
@@ -144,7 +174,6 @@ app.post('/api/checkout', async (req, res) => {
     } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); }
 });
 
-app.post('/api/login', async (req, res) => { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) { if(user.isBanned) return res.status(403).json({ success: false, error: 'Banned' }); if(!user.isVerified) return res.status(403).json({ success: false, error: 'Please verify your email.' }); res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, refCode: user.refCode, role: user.role, avatar: user.avatar, refCount: user.refCount } }); } else res.status(401).json({ success: false, error: 'Invalid credentials' }); });
 app.get('/api/notices', async (req, res) => res.json(await prisma.notice.findMany({ where: { isActive: true } }))); 
 app.get('/api/products', async (req, res) => res.json(await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }))); 
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await bot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
@@ -154,7 +183,7 @@ app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purc
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
 
-// 🔥 ADMIN APIS (UPDATED FOR PHYSICAL ORDERS)
+// Admin APIs
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { 
     const recentPurchases = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); 

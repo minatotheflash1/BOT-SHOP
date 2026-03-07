@@ -1,7 +1,6 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,11 +9,10 @@ datasource db {
 model Product {
   id        Int        @id @default(autoincrement())
   name      String
-  price     String   
-  abilities String
+  price     Float      // Price in BDT
+  abilities String     // Product Description (Size, Fabric etc)
   imageId   String?  
-  driveLink String?  
-  stock     Int        @default(1)
+  stock     Int        @default(100)
   rating    Float      @default(5.0) 
   createdAt DateTime   @default(now())
   purchases Purchase[] 
@@ -27,7 +25,7 @@ model User {
   telegramId         String?    @unique 
   firstName          String?
   country            String     @default("BD") 
-  balanceUsd         Float      @default(0.0) 
+  balanceBdt         Float      @default(0.0) // ONLY BDT
   refCode            String?    @unique 
   referredBy         String?    
   referralRewardPaid Boolean    @default(false)
@@ -38,13 +36,11 @@ model User {
   isBanned           Boolean    @default(false)
   role               String     @default("USER")
   avatar             String?
-  
   isVerified         Boolean    @default(false)
   verifyToken        String?
   resetToken         String?
-  resetCode          String?    // 🔥 NEW: 6-Digit OTP Code
+  resetCode          String?    
   resetExpiry        DateTime?
-
   deposits           Deposit[] 
   purchases          Purchase[] 
   createdAt          DateTime   @default(now())
@@ -69,14 +65,22 @@ model Deposit {
   createdAt     DateTime @default(now())
 }
 
+// 🔥 UPGRADED FOR PHYSICAL ORDERS
 model Purchase {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
-  pricePaid Float
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+  priceTotal  Float    // Original total
+  advancePaid Float    // 200 TK Booking
+  dueCod      Float    // Cash on delivery amount
+  phone       String?  // Customer Phone
+  street      String?  // House/Street
+  city        String?  // City/Area
+  postcode    String?  // Postal Code
+  status      String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
+  createdAt   DateTime @default(now())
 }
 
 model Notice {

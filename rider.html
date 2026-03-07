@@ -111,35 +111,59 @@
                             </div>
                         </div>
 
-                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-check-double mr-2"></i> Mark Delivered</button>
+                        <button onclick="confirmDelivery(${o.id}, ${o.dueCod})" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-transform active:scale-95"><i class="fa-solid fa-shield-halved mr-2"></i> Verify & Deliver</button>
                     </div>`;
                 }).join('');
 
-            } catch(e) {
-                document.getElementById('ordersContainer').innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>';
-            }
+            } catch(e) { document.getElementById('ordersContainer').innerHTML = '<p class="text-center text-red-400 font-bold mt-10">Connection Error.</p>'; }
         }
 
+        // 🔥 OTP VERIFICATION PROCESS
         function confirmDelivery(id, amount) {
             Swal.fire({
-                title: 'Confirm Delivery?',
-                html: `Did you receive exactly <b class="text-emerald-400 text-xl">৳${amount}</b> from the customer?`,
-                icon: 'warning',
+                title: 'Send OTP?',
+                html: `A verification code will be sent to the customer's email. Collect <b class="text-emerald-400 text-xl">৳${amount}</b> cash.`,
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#10b981',
+                confirmButtonColor: '#3b82f6',
                 cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Yes, Delivered!',
+                confirmButtonText: 'Yes, Send OTP',
                 ...swalDark
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-                    const res = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id}) });
+                    Swal.fire({title: 'Sending Email...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+                    
+                    const res = await fetch('/api/rider/send-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id}) });
                     const data = await res.json();
+                    
                     if(data.success) {
-                        Swal.fire({title: 'Success!', text: 'Order marked as Delivered.', icon: 'success', ...swalDark});
-                        fetchOrders(); // Refresh list
+                        const { value: otp } = await Swal.fire({
+                            title: 'Enter OTP Code',
+                            input: 'text',
+                            inputLabel: "Ask the customer for the 6-digit code from their email",
+                            inputPlaceholder: 'e.g. 123456',
+                            showCancelButton: true,
+                            confirmButtonColor: '#10b981',
+                            confirmButtonText: 'Verify & Complete',
+                            inputValidator: (value) => { if (!value) return 'You need to enter the code!' },
+                            ...swalDark
+                        });
+                        
+                        if(otp) {
+                            Swal.fire({title: 'Verifying...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+                            
+                            const verifyRes = await fetch('/api/rider/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, otp}) });
+                            const verifyData = await verifyRes.json();
+                            
+                            if(verifyData.success) {
+                                Swal.fire({title: 'Success!', text: 'Order marked as Delivered.', icon: 'success', ...swalDark});
+                                fetchOrders(); 
+                            } else {
+                                Swal.fire('Error', verifyData.error || 'Failed to verify.', 'error', ...swalDark);
+                            }
+                        }
                     } else {
-                        Swal.fire('Error', 'Failed to update order.', 'error', ...swalDark);
+                        Swal.fire('Error', data.error || 'Failed to send OTP.', 'error', ...swalDark);
                     }
                 }
             });

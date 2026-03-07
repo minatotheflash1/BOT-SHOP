@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin - AURA DIGITAL</title>
+    <title>Master Admin - AURA STORE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: #050b14; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
@@ -18,12 +17,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
         
-        .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        .badge-vip { background: linear-gradient(135deg, #fcd34d, #d97706, #fcd34d); color: #451a03; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; letter-spacing: 1px; box-shadow: 0 0 10px rgba(217, 119, 6, 0.4); }
-        
-        /* Mobile Sidebar Transitions */
-        .sidebar-open { transform: translateX(0); }
-        .sidebar-closed { transform: translateX(-100%); }
+        .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
     </style>
 </head>
@@ -40,67 +34,48 @@
     </div>
 
     <div class="md:hidden glass-panel w-full p-4 flex justify-between items-center z-50 border-b border-slate-800 hidden" id="mobileHeader">
-        <h2 class="text-xl font-black text-white">AURA <span class="text-blue-500">DIGITAL</span></h2>
+        <h2 class="text-xl font-black text-white">AURA <span class="text-blue-500">ADMIN</span></h2>
         <button onclick="toggleSidebar()" class="text-white text-2xl"><i class="fa-solid fa-bars"></i></button>
     </div>
 
     <div id="dashSection" class="hidden flex-1 flex h-full relative z-10 overflow-hidden">
-        
         <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
         <div id="sidebar" class="w-72 glass-panel border-r border-slate-800/80 flex flex-col p-8 space-y-2 shadow-2xl absolute md:relative z-50 h-full sidebar-closed transition-transform duration-300 bg-[#050b14] md:bg-transparent">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black text-white tracking-tighter hidden md:block">AURA <span class="text-blue-500">DIGITAL</span></h2>
+                <h2 class="text-2xl font-black text-white tracking-tighter hidden md:block">AURA <span class="text-blue-500">ADMIN</span></h2>
                 <h2 class="text-2xl font-black text-white tracking-tighter md:hidden">Menu</h2>
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <button onclick="showTab('stats', this)" class="tab-btn active text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-chart-pie mr-4 w-5"></i> Overview</button>
-            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-box-open mr-4 w-5"></i> Products</button>
-            <button onclick="showTab('promo', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-ticket mr-4 w-5"></i> Promos</button>
+            <button onclick="showTab('orders', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-box mr-4 w-5"></i> Orders</button>
+            <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
             <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-money-bill-transfer mr-4 w-5"></i> Deposits</button>
             <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
-            <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-tower-broadcast mr-4 w-5"></i> Broadcast</button>
+            <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-bullhorn mr-4 w-5"></i> Broadcast</button>
         </div>
 
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
             <div id="statsTab" class="tab-content animate-[fadeIn_0.4s_ease-out]">
                 <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Command Center</h1>
                 <div class="glass-panel p-6 rounded-3xl mb-8 flex flex-col md:flex-row justify-between items-center border border-red-500/20 bg-red-500/5">
-                    <div class="mb-4 md:mb-0 text-center md:text-left">
-                        <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i> Maintenance Mode</h3>
-                        <p class="text-slate-400 text-xs mt-1">If enabled, users will see the maintenance.html page.</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()">
-                        <div class="w-14 h-7 bg-slate-700 rounded-full peer peer-checked:bg-red-500 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full"></div>
-                    </label>
+                    <div class="mb-4 md:mb-0 text-center md:text-left"><h3 class="font-bold text-white text-lg"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i> Maintenance Mode</h3><p class="text-slate-400 text-xs mt-1">If enabled, users see maintenance.html.</p></div>
+                    <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="maintenanceToggle" class="sr-only peer" onchange="toggleMaintenance()"><div class="w-14 h-7 bg-slate-700 rounded-full peer peer-checked:bg-red-500 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full"></div></label>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Revenue</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">$0</h2></div>
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Sales (Advance Collected)</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
                 </div>
-                <div class="glass-panel p-8 rounded-[32px] hidden md:block"><h3 class="font-bold text-white mb-4">Sales Analytics</h3><canvas id="revenueChart" height="100"></canvas></div>
+            </div>
+
+            <div id="ordersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Manage Orders</h1>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Customer & Address</th><th class="p-6">Product Ordered</th><th class="p-6">Payment</th><th class="p-6 text-right">Status & Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
 
             <div id="productsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Product Control</h1>
-                <div class="glass-panel p-6 rounded-[32px] mb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <input type="text" id="pName" placeholder="Product Title" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
-                        <input type="text" id="pPrice" placeholder="Price (USD)" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
-                        <input type="number" id="pStock" placeholder="Stock Qty" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
-                        <input type="text" id="pAbilities" placeholder="Short Description" class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
-                        <input type="text" id="pLink" placeholder="Google Drive Link" class="md:col-span-2 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold">
-                    </div>
-                    <button onclick="addProductWeb()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-3 font-black rounded-xl">Publish Product</button>
-                </div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Title</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div>
-            </div>
-
-            <div id="promoTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Promo Codes</h1>
-                <div class="glass-panel p-6 rounded-[32px] mb-8"><div class="flex flex-col md:flex-row gap-4"><input type="text" id="prCode" placeholder="Code (e.g. EID20)" class="flex-1 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none uppercase font-bold"><input type="number" id="prDisc" placeholder="Discount %" class="w-full md:w-32 bg-slate-900/80 border border-slate-700 p-4 rounded-xl text-white outline-none font-bold"><button onclick="addPromo()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 font-black rounded-xl hover:bg-blue-500">Create</button></div></div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[400px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase"><th class="p-6">Code</th><th class="p-6">Discount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="promoListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
+                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Inventory</h1>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[600px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Item Name</th><th class="p-6">Price (BDT)</th><th class="p-6">Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
 
             <div id="depositsTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
@@ -110,9 +85,7 @@
 
             <div id="usersTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"><h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-full md:w-72"></div>
-                <div class="glass-panel rounded-[32px] overflow-x-auto">
-                    <table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name & Roles</th><th class="p-6">Email / Ref</th><th class="p-6">Balance</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table>
-                </div>
+                <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name & Roles</th><th class="p-6">Email / Ref</th><th class="p-6">Wallet (BDT)</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
 
             <div id="noticesTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
@@ -120,91 +93,75 @@
                 <div class="flex flex-col md:flex-row gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-6 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none font-bold" placeholder="Write announcement..."><button onclick="addNotice()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 font-black rounded-xl">Transmit</button></div>
                 <div id="noticeList" class="space-y-4"></div>
             </div>
-
         </div>
     </div>
 
     <script>
-        let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; let chartInstance = null;
+        let pass = sessionStorage.getItem('adminPass'); let globalUsers = []; 
         if(pass) checkAuth();
 
-        function toggleSidebar() { 
-            document.getElementById('sidebar').classList.toggle('sidebar-closed'); 
-            document.getElementById('sidebar').classList.toggle('sidebar-open');
-            document.getElementById('sidebarOverlay').classList.toggle('hidden');
-        }
-
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebar').classList.toggle('sidebar-open'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
         async function login() { pass = document.getElementById('adminPass').value; const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); if(res.ok) { sessionStorage.setItem('adminPass', pass); checkAuth(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title:'Access Denied'}); } }
-        
-        async function checkAuth() { 
-            document.getElementById('loginSection').classList.add('hidden'); 
-            document.getElementById('dashSection').classList.remove('hidden'); 
-            document.getElementById('mobileHeader').classList.remove('hidden');
-            loadAllData(); loadSettings(); 
-        }
+        async function checkAuth() { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('dashSection').classList.remove('hidden'); document.getElementById('mobileHeader').classList.remove('hidden'); loadAllData(); loadSettings(); }
 
         function showTab(tabId, btnElement) { 
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); 
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
-            document.getElementById(tabId + 'Tab').classList.remove('hidden'); 
-            if(btnElement) btnElement.classList.add('active'); 
-            if(window.innerWidth < 768) toggleSidebar(); // Close sidebar on mobile after clicking
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); if(window.innerWidth < 768) toggleSidebar(); 
         }
         
-        async function loadSettings() {
-            const res = await fetch('/api/admin/settings'); const data = await res.json();
-            document.getElementById('maintenanceToggle').checked = data.isMaintenance;
-        }
-
-        async function toggleMaintenance() {
-            const status = document.getElementById('maintenanceToggle').checked;
-            await fetch('/api/admin/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: pass, status }) });
-            Swal.fire({toast:true, position:'top-end', icon:'success', title: status ? 'Maintenance ON' : 'Maintenance OFF', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'});
-        }
+        async function loadSettings() { const res = await fetch('/api/admin/settings'); const data = await res.json(); document.getElementById('maintenanceToggle').checked = data.isMaintenance; }
+        async function toggleMaintenance() { const status = document.getElementById('maintenanceToggle').checked; await fetch('/api/admin/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: pass, status }) }); Swal.fire({toast:true, position:'top-end', icon:'success', title: status ? 'Maintenance ON' : 'Maintenance OFF', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); }
 
         async function loadAllData() {
             const res = await fetch('/api/admin/stats'); const data = await res.json();
-            document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "$" + data.revenue.toFixed(2);
+            document.getElementById('statUsers').innerText = data.users; document.getElementById('statRev').innerText = "৳" + data.revenue.toFixed(0);
             globalUsers = data.userList; renderUsers(globalUsers);
             
             document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
-            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">$${p.price.replace(/[^0-9.]/g, '')}</td><td class="p-6 font-bold ${p.stock > 0 ? 'text-emerald-400' : 'text-red-400'}">${p.stock}</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
-            document.getElementById('promoListBody').innerHTML = data.promos.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-black text-blue-400 text-xl">${p.code}</td><td class="p-6 text-white font-bold text-lg">${p.discount}%</td><td class="p-6 text-right"><button onclick="deletePromo(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} units</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             const nRes = await fetch('/api/notices'); const notices = await nRes.json(); document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-6 rounded-2xl flex justify-between items-center"><span class="text-white font-bold">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
             
-            const ctx = document.getElementById('revenueChart');
-            if(ctx && window.innerWidth > 768) {
-                if(chartInstance) chartInstance.destroy();
-                chartInstance = new Chart(ctx.getContext('2d'), { type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label: 'Sales', data: [10,25,12,30,15,40,22], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, scales: { y: { display: false }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
-            }
+            // Render Orders
+            document.getElementById('adminOrderList').innerHTML = data.orders.map(o => `
+                <tr class="hover:bg-slate-800/20">
+                    <td class="p-6">
+                        <p class="font-bold text-white mb-1">${o.user.firstName}</p>
+                        <p class="text-xs text-blue-400 mb-1"><i class="fa-solid fa-phone mr-1"></i> ${o.phone || 'N/A'}</p>
+                        <p class="text-xs text-slate-400 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> ${o.street || ''}, ${o.city || ''} - ${o.postcode || ''}</p>
+                    </td>
+                    <td class="p-6">
+                        <p class="font-bold text-slate-200">${o.product ? o.product.name : 'Deleted Product'}</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Order #${o.id}</p>
+                    </td>
+                    <td class="p-6">
+                        <p class="text-xs text-slate-400 mb-1">Total: ৳${o.priceTotal}</p>
+                        <p class="text-xs text-slate-400 mb-1">Advance: <span class="text-emerald-400 font-bold">৳${o.advancePaid}</span></p>
+                        <p class="text-xs text-slate-400">Due (COD): <span class="text-red-400 font-black">৳${o.dueCod}</span></p>
+                    </td>
+                    <td class="p-6 text-right">
+                        <span class="text-[10px] font-black px-3 py-1 rounded bg-slate-800 border border-slate-600 mb-3 inline-block">${o.status}</span><br>
+                        ${o.status === 'PROCESSING' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded mr-1 uppercase font-bold tracking-widest transition-colors shadow-lg">Mark Shipped</button>` : ''}
+                        ${o.status === 'SHIPPED' ? `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest transition-colors shadow-lg">Delivered</button>` : ''}
+                    </td>
+                </tr>`).join('');
         }
 
         function filterUsers() { const query = document.getElementById('userSearch').value.toLowerCase(); const filtered = globalUsers.filter(u => u.firstName.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query))); renderUsers(filtered); }
-        
-        function renderUsers(users) { 
-            document.getElementById('userListBody').innerHTML = users.map(u => `
-            <tr class="hover:bg-slate-800/20 ${u.isBanned ? 'opacity-50' : ''}">
-                <td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} <div class="flex flex-col"><span>${u.firstName} ${u.role === 'ADMIN' ? '<span class="badge-admin">ADMIN</span>' : ''} ${u.isVip ? '<span class="badge-vip">VIP</span>' : ''}</span> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black">BANNED</span>':''}</div></td>
-                <td class="p-6 text-sm text-slate-400">${u.email}<br><span class="text-[10px] text-blue-400 font-mono tracking-widest">Ref: ${u.refCode}</span></td>
-                <td class="p-6 text-emerald-400 font-black text-xl">$${u.balanceUsd.toFixed(2)}</td>
-                <td class="p-6 text-right whitespace-nowrap">
-                    <button onclick="editBalance(${u.id}, ${u.balanceUsd})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors" title="Edit Balance"><i class="fa-solid fa-wallet"></i></button>
-                    <button onclick="toggleAdmin(${u.id}, '${u.role}')" class="bg-purple-500/20 text-purple-400 p-2 rounded-lg mr-2 hover:bg-purple-600 hover:text-white transition-colors" title="Toggle Admin Role"><i class="fa-solid fa-user-shield"></i></button>
-                    <button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="${u.isBanned?'Unban User':'Ban User'}"><i class="fa-solid fa-ban"></i></button>
-                </td>
-            </tr>`).join(''); 
-        }
+        function renderUsers(users) { document.getElementById('userListBody').innerHTML = users.map(u => `<tr class="hover:bg-slate-800/20 ${u.isBanned ? 'opacity-50' : ''}"><td class="p-6 font-bold text-white flex items-center">${u.avatar ? `<img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover mr-3 border border-slate-600">` : `<div class="w-8 h-8 rounded-full bg-slate-700 mr-3 flex items-center justify-center">${u.firstName.charAt(0)}</div>`} <div class="flex flex-col"><span>${u.firstName} ${u.role === 'ADMIN' ? '<span class="text-[10px] text-blue-500 font-black">ADMIN</span>' : ''}</span> ${u.isBanned?'<span class="text-[10px] text-red-500 font-black">BANNED</span>':''}</div></td><td class="p-6 text-sm text-slate-400">${u.email}<br><span class="text-[10px] text-blue-400 font-mono tracking-widest">Ref: ${u.refCode}</span></td><td class="p-6 text-emerald-400 font-black text-xl">৳${u.balanceBdt.toFixed(2)}</td><td class="p-6 text-right whitespace-nowrap"><button onclick="editBalance(${u.id}, ${u.balanceBdt})" class="bg-blue-500/20 text-blue-400 p-2 rounded-lg mr-2 hover:bg-blue-500 hover:text-white transition-colors" title="Edit Balance"><i class="fa-solid fa-wallet"></i></button><button onclick="toggleAdmin(${u.id}, '${u.role}')" class="bg-purple-500/20 text-purple-400 p-2 rounded-lg mr-2 hover:bg-purple-600 hover:text-white transition-colors" title="Toggle Admin Role"><i class="fa-solid fa-user-shield"></i></button><button onclick="toggleBan(${u.id}, ${u.isBanned})" class="${u.isBanned?'bg-red-500 text-white':'bg-red-500/10 text-red-400'} p-2 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="${u.isBanned?'Unban User':'Ban User'}"><i class="fa-solid fa-ban"></i></button></td></tr>`).join(''); }
 
-        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Balance', input: 'number', inputValue: currentBalance, inputAttributes: { step: '0.01' }, showCancelButton: true, background:'#1e293b', color:'#fff' }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); } }
+        async function editBalance(id, currentBalance) { const { value: amount } = await Swal.fire({ title: 'Set Wallet BDT', input: 'number', inputValue: currentBalance, inputAttributes: { step: '1' }, showCancelButton: true, background:'#1e293b', color:'#fff' }); if (amount) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'balance', id, amount})}); loadAllData(); Swal.fire({toast:true, position:'top-end', icon:'success', title:'Updated', showConfirmButton:false, timer:1500, background:'#1e293b', color:'#fff'}); } }
         async function toggleAdmin(id, currentRole) { const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN'; if(confirm(`Change role to ${newRole}?`)) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'role', id, role: newRole})}); loadAllData(); } }
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
-        async function addProductWeb() { const name = document.getElementById('pName').value; const price = document.getElementById('pPrice').value; const stock = document.getElementById('pStock').value; const abilities = document.getElementById('pAbilities').value; const driveLink = document.getElementById('pLink').value; if(!name) return; await fetch('/api/admin/product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, name, price, stock, abilities, driveLink}) }); loadAllData(); }
-        async function deleteProduct(id) { if(confirm('Delete?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
+        async function deleteProduct(id) { if(confirm('Delete Product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
+        
+        async function updateOrderStatus(id, status) {
+            Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
+            await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) });
+            Swal.close(); loadAllData(); toast('success', `Marked as ${status}`);
+        }
+
         async function addNotice() { const text = document.getElementById('noticeInput').value; if(!text) return; await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, text}) }); document.getElementById('noticeInput').value=''; loadAllData(); }
         async function deleteNotice(id) { await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData(); }
-        async function addPromo() { const code = document.getElementById('prCode').value; const discount = document.getElementById('prDisc').value; if(!code || !discount) return; await fetch('/api/admin/promo', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, code, discount}) }); document.getElementById('prCode').value=''; document.getElementById('prDisc').value=''; loadAllData(); }
-        async function deletePromo(id) { await fetch('/api/admin/promo/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); }
     </script>
 </body>
 </html>

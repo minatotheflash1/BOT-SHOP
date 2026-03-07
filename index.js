@@ -8,9 +8,9 @@ const crypto = require('crypto');
 const prisma = new PrismaClient();
 
 // 🔥 MULTI-BOT ARCHITECTURE
-const mainBot = new Telegraf(process.env.BOT_TOKEN);
-const logBot = process.env.LOG_BOT_TOKEN ? new Telegraf(process.env.LOG_BOT_TOKEN) : mainBot;
-const feedbackBot = process.env.FEEDBACK_BOT_TOKEN ? new Telegraf(process.env.FEEDBACK_BOT_TOKEN) : logBot;
+const mainBot = new Telegraf(process.env.BOT_TOKEN); // Main Admin Bot
+const logBot = process.env.LOG_BOT_TOKEN ? new Telegraf(process.env.LOG_BOT_TOKEN) : mainBot; // Order Logs
+const feedbackBot = process.env.FEEDBACK_BOT_TOKEN ? new Telegraf(process.env.FEEDBACK_BOT_TOKEN) : logBot; // Feedback Logs
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -21,14 +21,11 @@ const ADMIN_ID = process.env.ADMIN_ID;
 let isMaintenance = false;
 const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
 
-// 🔥 FIXED MAINTENANCE MIDDLEWARE (Cache Buster)
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path.startsWith('/api/rider') || req.path === '/rider') return next();
   
   if (isMaintenance) { 
       if (req.path.startsWith('/api/')) return res.status(503).json({ success: false, message: 'Maintenance Active' }); 
-      
-      // Force browser to NOT cache this response and load the maintenance page
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
@@ -39,6 +36,11 @@ app.use((req, res, next) => {
 
 const generateRefCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
+// =========================================================
+// 🔥 TELEGRAM MAIN BOT LOGIC (FULL ADMIN CONTROL)
+// =========================================================
+
+// 1. Scene for Adding Product
 const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
   (ctx) => { ctx.reply('🛍️ 1. Product Name?'); return ctx.wizard.next(); },
   (ctx) => { ctx.wizard.state.name = ctx.message.text; ctx.reply('💵 2. Price in BDT (৳)?'); return ctx.wizard.next(); },
@@ -50,16 +52,83 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
       if (ctx.message.text === '/finish') {
           if (ctx.wizard.state.imageIds.length === 0) { ctx.reply('❌ Send at least 1 photo!'); return; }
           const { name, price, abilities, stock, sizes, colors, imageIds } = ctx.wizard.state; 
-          try { await prisma.product.create({ data: { name, price, abilities, stock, sizes, colors, imageIds } }); ctx.reply(`🎉 *Product Added!*`, { parse_mode: 'Markdown' }); } catch(e) { ctx.reply(`❌ Error: ${e.message}`); }
+          try { await prisma.product.create({ data: { name, price, abilities, stock, sizes, colors, imageIds } }); ctx.reply(`🎉 *Product Added Successfully!*`, { parse_mode: 'Markdown' }); } catch(e) { ctx.reply(`❌ Error: ${e.message}`); }
           return ctx.scene.leave(); 
       }
       if (ctx.message.photo) { ctx.wizard.state.imageIds.push(ctx.message.photo[ctx.message.photo.length - 1].file_id); ctx.reply(`🖼️ Photo received! (${ctx.wizard.state.imageIds.length} total). Send another or /finish`); return; }
   }
 );
-const stage = new Scenes.Stage([addProductWizard]); mainBot.use(session()); mainBot.use(stage.middleware());
-mainBot.start((ctx) => { ctx.reply(`🌟 *AURA MAIN BOT*\nUse /addproduct to add items.`, { parse_mode: 'Markdown' }); });
-mainBot.command('addproduct', (ctx) => { if (ctx.from.id.toString() !== ADMIN_ID) return; ctx.scene.enter('ADD_PRODUCT_SCENE'); });
 
+// 2. Scene for Adding Notice
+const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE',
+  (ctx) => { ctx.reply('📢 *Type the Notice you want to show on the website:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); },
+  async (ctx) => {
+      if(ctx.message.text) {
+          await prisma.notice.create({ data: { text: ctx.message.text } });
+          ctx.reply('✅ *Notice added! It is now live on the website.*', { parse_mode: 'Markdown' });
+      }
+      return ctx.scene.leave();
+  }
+);
+
+const stage = new Scenes.Stage([addProductWizard, addNoticeWizard]); 
+mainBot.use(session()); mainBot.use(stage.middleware());
+
+// Bot Start & Admin Menu Function
+function sendAdminMenu(ctx) {
+    if (ctx.from.id.toString() !== ADMIN_ID) return ctx.reply('❌ Unauthorized Access.');
+    const mStatus = isMaintenance ? '🔴 ON' : '🟢 OFF';
+    ctx.reply(`🌟 *AURA STORE MASTER CONTROL*\nWelcome Admin. Select an action:`, {
+        parse_mode: 'Markdown',
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🛍️ Add New Product', callback_data: 'menu_add_product' }],
+                [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }],
+                [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }],
+                [{ text: '📊 View Store Stats', callback_data: 'menu_stats' }]
+            ]
+        }
+    });
+}
+
+mainBot.start((ctx) => sendAdminMenu(ctx));
+mainBot.command('admin', (ctx) => sendAdminMenu(ctx));
+mainBot.command('addproduct', (ctx) => { if (ctx.from.id.toString() === ADMIN_ID) ctx.scene.enter('ADD_PRODUCT_SCENE'); });
+
+// Bot Button Actions
+mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
+mainBot.action('menu_add_notice', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_NOTICE_SCENE'); });
+mainBot.action('menu_clear_notices', async (ctx) => { 
+    await prisma.notice.deleteMany({}); 
+    ctx.answerCbQuery('🗑️ All notices deleted!'); 
+    ctx.reply('✅ *All active notices have been cleared from the website.*', { parse_mode: 'Markdown' });
+});
+mainBot.action('toggle_maintenance', async (ctx) => {
+    isMaintenance = !isMaintenance;
+    const mStatus = isMaintenance ? '🔴 ON' : '🟢 OFF';
+    await ctx.editMessageReplyMarkup({
+        inline_keyboard: [
+            [{ text: '🛍️ Add New Product', callback_data: 'menu_add_product' }],
+            [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }],
+            [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }],
+            [{ text: '📊 View Store Stats', callback_data: 'menu_stats' }]
+        ]
+    }).catch(e=>{});
+    ctx.answerCbQuery(`Maintenance Mode ${isMaintenance ? 'Activated' : 'Deactivated'}`);
+});
+mainBot.action('menu_stats', async (ctx) => {
+    ctx.answerCbQuery('Loading Stats...');
+    const users = await prisma.user.count();
+    const orders = await prisma.purchase.count();
+    const revAggr = await prisma.purchase.aggregate({ _sum: { advancePaid: true } });
+    const rev = revAggr._sum.advancePaid || 0;
+    const pendingOrders = await prisma.purchase.count({ where: { status: 'PENDING' } });
+    ctx.reply(`📊 *LIVE STORE STATS*\n\n👥 Total Users: ${users}\n📦 Total Orders: ${orders}\n⏳ Pending Orders: ${pendingOrders}\n💰 Total Advance: ৳${rev}`, { parse_mode: 'Markdown' });
+});
+
+// =========================================================
+// 🔥 LOG BOT LOGIC (FOR DEPOSITS & ORDERS)
+// =========================================================
 async function processDeposit(id, action) {
   const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } });
   if (dep && dep.status === 'PENDING') {
@@ -82,6 +151,10 @@ logBot.action(/deliver_(.+)/, (ctx) => updateOrderTelegram(ctx, 'DELIVERED', '�
 
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
+
+// =========================================================
+// 🔥 EXPRESS APIs
+// =========================================================
 
 app.post('/api/feedback', (req, res) => {
     const { userId, subject, message } = req.body;
@@ -304,13 +377,8 @@ app.post('/api/rider/order/action', async (req, res) => {
     } catch(e) { res.json({ success: false }); }
 });
 
-// --- ADMIN APIs ---
-
-// 🔥 GET Settings (Crucial for Admin toggle to work properly)
-app.get('/api/admin/settings', (req, res) => {
-    res.json({ isMaintenance });
-});
-
+// Admin APIs
+app.get('/api/admin/settings', (req, res) => { res.json({ isMaintenance }); });
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { const recentPurchases = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); let revenue = recentPurchases.reduce((acc, p) => acc + p.advancePaid, 0); res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), userList: await prisma.user.findMany({ take: 50, orderBy: { createdAt: 'desc' } }), riderList: await prisma.rider.findMany({ orderBy: { createdAt: 'desc' } }), orders: recentPurchases, revenue }); });
 app.post('/api/admin/order/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); await prisma.purchase.update({ where: { id: parseInt(req.body.id) }, data: { status: req.body.status } }); res.json({success:true}); });
@@ -319,8 +387,6 @@ app.post('/api/admin/rider/action', async (req, res) => { if (req.body.password 
 app.post('/api/admin/deposit/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); const result = await processDeposit(parseInt(req.body.id), req.body.action); res.json(result); });
 app.delete('/api/admin/product/:id', async (req, res) => { try { await prisma.product.delete({ where: { id: parseInt(req.params.id) } }); res.json({ success: true }); } catch(e) { res.status(500).json({ success: false }); } });
 app.post('/api/admin/notice', async (req, res) => { await prisma.notice.create({ data: { text: req.body.text } }); res.json({ success: true }); });
-
-// 🔥 MAINTENANCE TOGGLE API
 app.post('/api/admin/settings', (req, res) => { 
     if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); 
     isMaintenance = req.body.status; 

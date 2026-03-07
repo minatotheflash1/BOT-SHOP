@@ -28,12 +28,13 @@
         .badge-admin { background: linear-gradient(135deg, #ef4444, #991b1b, #ef4444); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         .badge-basic { background: linear-gradient(135deg, #94a3b8, #475569, #94a3b8); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; } .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-        .status-processing { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.5); }
-        .status-shipped { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5); }
-        .status-delivered { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); }
         
-        /* Select Dropdowns */
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #facc15; }
+        .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #60a5fa; }
+        .st-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #c084fc; }
+        .st-delivered { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #34d399; }
+        
         .variant-select { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; rounded: 8px; outline: none; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
         .variant-select:focus { border-color: #3b82f6; }
     </style>
@@ -70,7 +71,6 @@
 
     <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[#0b1121] border-l border-slate-800 z-[70] drawer-closed transition-transform duration-300 flex flex-col shadow-2xl">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-2xl font-black"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2><button onclick="toggleCart()" class="w-10 h-10 bg-slate-800 rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button></div>
-        
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
             <div id="addressSection" class="hidden bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -82,7 +82,6 @@
                 </div>
             </div>
         </div>
-
         <div class="p-6 border-t border-slate-800 bg-slate-900/50">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-400 text-sm">Subtotal:</span><span id="cartTotal" class="font-bold text-white text-lg">৳0</span></div>
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-800"><span class="font-bold text-slate-400 text-sm">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-400 text-lg">- ৳0</span></div>
@@ -136,6 +135,8 @@
         let user = null; try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){ localStorage.removeItem('user'); }
         let allProducts = []; let cart = []; let base64Avatar = '';
 
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }
+
         function getBadge(role) { return role === 'ADMIN' ? '<span class="r-badge badge-admin">ADMIN</span>' : '<span class="r-badge badge-basic">USER</span>'; }
 
         async function init() {
@@ -157,7 +158,7 @@
                 let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`;
                 let displayBal = `৳${parseFloat(user.balanceBdt).toFixed(0)}`;
 
-                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-box mr-1"></i> Orders</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-[0_0_10px_rgba(59,130,246,0.3)] mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-400">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_10px_rgba(59,130,246,0.5)] mr-2 hover:bg-blue-500 transition-colors"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>`;
+                authDiv.innerHTML = `<button onclick="openFund()" class="bg-emerald-600/20 text-emerald-400 px-4 py-2 rounded-full font-black border border-emerald-500/30 mr-2 hover:bg-emerald-600/40 transition-colors"><i class="fa-solid fa-plus mr-1"></i> Fund</button><button onclick="openProfileDashboard('orders')" class="hidden sm:block bg-purple-600/20 text-purple-400 px-4 py-2 rounded-full font-bold text-sm mr-2 hover:bg-purple-600/40 transition-colors"><i class="fa-solid fa-box mr-1"></i> Orders</button><div class="hidden sm:flex items-center bg-slate-800 px-4 py-1.5 rounded-full font-black border border-slate-700 shadow-[0_0_10px_rgba(59,130,246,0.3)] mr-2"><span class="mr-2 pr-2 border-r border-slate-600 text-sm flex items-center">${uName} ${getBadge(user.role)}</span><span class="text-emerald-400">${displayBal}</span></div><button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_10px_rgba(59,130,246,0.5)] mr-2 hover:bg-blue-500 transition-colors relative"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button><button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-slate-800 rounded-full flex justify-center items-center border border-slate-700 overflow-hidden hover:bg-slate-700 transition-colors">${avHtml}</button>`;
                 
                 mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center"><i class="fa-solid fa-store text-xl"></i><span class="text-[10px] mt-1 font-bold">Store</span></button><button onclick="toggleCart()" class="text-slate-400 flex flex-col items-center hover:text-blue-400 transition-colors relative"><i class="fa-solid fa-cart-shopping text-xl"></i><span id="cartCountMob" class="absolute top-0 right-2 bg-red-500 text-white text-[8px] w-3 h-3 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] mt-1 font-bold">Cart</span></button><button onclick="openFund()" class="text-emerald-400 flex flex-col items-center hover:text-emerald-300 transition-colors"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1 font-bold">${displayBal}</span></button><button onclick="openProfileDashboard('overview')" class="text-slate-400 flex flex-col items-center hover:text-white transition-colors"><div class="w-6 h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-600 flex justify-center items-center">${avHtml}</div><span class="text-[10px] mt-1 font-bold">Profile</span></button>`;
             } else {
@@ -172,41 +173,33 @@
             catch(e) { document.getElementById('product-list').innerHTML = '<div class="col-span-full text-center text-red-400 font-bold py-10">Error loading products.</div>'; } 
         }
 
-        // 🔥 PRODUCT RENDER WITH SIZES, COLORS & MULTI-IMAGE GALLERY
         function renderProducts(list) {
             const container = document.getElementById('product-list');
             if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No items available.</div>';
             
             container.innerHTML = list.map(p => {
-                let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="sz-${p.id}" class="variant-select rounded-lg"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
-                let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select rounded-lg"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
+                let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="sz-${p.id}" class="variant-select rounded-lg"><option value="">Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
+                let colorOpts = p.colors && p.colors.length > 0 ? `<select id="cl-${p.id}" class="variant-select rounded-lg"><option value="">Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
                 let variantHtml = (sizeOpts || colorOpts) ? `<div class="flex gap-2 mb-4">${sizeOpts}${colorOpts}</div>` : `<div class="mb-4 text-xs text-slate-500 font-bold">Standard Variant</div>`;
 
                 let btnHtml = p.stock <= 0 
                     ? `<button disabled class="w-full bg-red-900/30 text-red-500 py-3 rounded-xl font-black uppercase text-xs cursor-not-allowed border border-red-900/50"><i class="fa-solid fa-ban mr-2"></i> Sold Out</button>`
                     : `<div class="flex gap-2"><button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-1 bg-slate-800 hover:bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs transition-colors border border-slate-700 shadow-lg"><i class="fa-solid fa-cart-plus"></i></button><button onclick="buyNow(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black uppercase text-xs transition-colors shadow-lg"><i class="fa-solid fa-bolt mr-2"></i> Buy Now</button></div>`;
                 
-                // Read imageIds array (multi-image) or fallback to single imageId
                 let mainImage = (p.imageIds && p.imageIds.length > 0) ? p.imageIds[0] : p.imageId;
                 let imgHtml = mainImage ? `<img src="/api/photo/${mainImage}" onclick="openGallery(${p.id})" onerror="this.src='https://placehold.co/400x400/1e293b/475569?text=Product'" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500">` : `<i class="fa-solid fa-box-open text-5xl text-slate-700"></i>`;
-                let stockBadge = p.stock <= 0 ? `<div class="absolute top-2 left-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">OUT OF STOCK</div>` : `<div class="absolute top-2 left-2 bg-slate-800/80 border border-slate-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">Stock: ${p.stock}</div>`;
+                let stockBadge = p.stock <= 0 ? `<div class="absolute top-2 left-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">OUT OF STOCK</div>` : `<div class="absolute top-2 left-2 bg-slate-800/80 border border-slate-600 backdrop-blur px-2 py-1 rounded text-white text-[10px] font-black shadow-lg">In Stock: ${p.stock}</div>`;
                 let galleryBadge = (p.imageIds && p.imageIds.length > 1) ? `<div class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-white text-[10px] font-bold"><i class="fa-regular fa-images"></i> +${p.imageIds.length - 1}</div>` : '';
                 
-                return `<div class="product-card p-4 flex flex-col justify-between"><div><div class="w-full h-64 bg-slate-800 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative shadow-inner">${imgHtml}${stockBadge}${galleryBadge}</div><h3 class="text-xl font-black mb-1 leading-tight">${p.name}</h3><p class="text-slate-400 text-[10px] mb-3 line-clamp-2">${p.abilities}</p><p class="text-2xl font-black text-emerald-400 mb-3">৳${p.price}</p>${variantHtml}</div>${btnHtml}</div>`;
+                return `<div class="product-card p-4 flex flex-col justify-between"><div><div class="w-full h-56 bg-slate-800 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative shadow-inner">${imgHtml}${stockBadge}${galleryBadge}</div><h3 class="text-xl font-black mb-1 leading-tight">${p.name}</h3><p class="text-slate-400 text-[10px] mb-3 line-clamp-2">${p.abilities}</p><p class="text-2xl font-black text-emerald-400 mb-3">৳${p.price}</p>${variantHtml}</div>${btnHtml}</div>`;
             }).join('');
         }
 
-        // 🔥 FULL SCREEN IMAGE GALLERY LOGIC
         function openGallery(productId) {
-            const p = allProducts.find(x => x.id === productId);
-            if(!p || !p.imageIds || p.imageIds.length === 0) return;
-            const modal = document.getElementById('imageModal');
-            const mainImg = document.getElementById('galleryMainImg');
-            const thumbs = document.getElementById('galleryThumbnails');
-            
+            const p = allProducts.find(x => x.id === productId); if(!p || !p.imageIds || p.imageIds.length === 0) return;
+            const modal = document.getElementById('imageModal'); const mainImg = document.getElementById('galleryMainImg'); const thumbs = document.getElementById('galleryThumbnails');
             mainImg.src = `/api/photo/${p.imageIds[0]}`;
             thumbs.innerHTML = p.imageIds.map(id => `<img src="/api/photo/${id}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer transition-all">`).join('');
-            
             modal.classList.replace('hidden', 'flex');
         }
         function closeGallery() { document.getElementById('imageModal').classList.replace('flex', 'hidden'); }
@@ -221,17 +214,13 @@
             else { cDesk.classList.add('hidden'); cMob.classList.add('hidden'); }
         }
 
-        // 🔥 CART LOGIC WITH SIZE & COLOR CHECK
         function addToCart(id, name, price) {
             if(!user) return location.href='/login';
             let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
             let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
-            if(sEl && !size) return Swal.fire('Error', 'Please select a Size first!', 'warning', ...swalDark);
-            if(cEl && !color) return Swal.fire('Error', 'Please select a Color first!', 'warning', ...swalDark);
-            
-            const pInfo = allProducts.find(x=>x.id===id);
-            let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
-
+            if(sEl && !size) return Swal.fire('Error', 'Please select a Size!', 'warning', ...swalDark);
+            if(cEl && !color) return Swal.fire('Error', 'Please select a Color!', 'warning', ...swalDark);
+            const pInfo = allProducts.find(x=>x.id===id); let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
             cart.push({ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }); 
             renderCart(); updateCartBadge(); toast('success', 'Added to Cart'); 
         }
@@ -240,11 +229,9 @@
             if(!user) return location.href='/login';
             let sEl = document.getElementById(`sz-${id}`); let cEl = document.getElementById(`cl-${id}`);
             let size = sEl ? sEl.value : null; let color = cEl ? cEl.value : null;
-            if(sEl && !size) return Swal.fire('Error', 'Please select a Size first!', 'warning', ...swalDark);
-            if(cEl && !color) return Swal.fire('Error', 'Please select a Color first!', 'warning', ...swalDark);
-            
+            if(sEl && !size) return Swal.fire('Error', 'Please select a Size!', 'warning', ...swalDark);
+            if(cEl && !color) return Swal.fire('Error', 'Please select a Color!', 'warning', ...swalDark);
             const pInfo = allProducts.find(x=>x.id===id); let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null;
-            
             cart = [{ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }]; 
             document.getElementById('addressSection').classList.remove('hidden');
             renderCart(); updateCartBadge(); toggleCart();
@@ -256,20 +243,18 @@
             const container = document.getElementById('cartItemsContainer');
             if(cart.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-cart-arrow-down text-4xl mb-3"></i><br><p class="font-bold">Cart is empty</p></div>'; document.getElementById('cartTotal').innerText = '৳0'; document.getElementById('cartDue').innerText = '৳0'; document.getElementById('cartAdvance').innerText = '- ৳0'; return; }
             
-            document.getElementById('addressSection').classList.remove('hidden'); // Show address if cart has items
+            document.getElementById('addressSection').classList.remove('hidden'); 
             let sum = 0; 
             container.innerHTML = cart.map(i => { 
                 sum += i.price; 
                 let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-slate-600">` : `<div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`;
                 let variants = []; if(i.size) variants.push(`Size: ${i.size}`); if(i.color) variants.push(`Color: ${i.color}`);
                 let varHtml = variants.length > 0 ? `<p class="text-[10px] text-slate-400 mt-1">${variants.join(' | ')}</p>` : '';
-
                 return `<div class="bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight">${i.name}</p>${varHtml}<p class="text-emerald-400 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 hover:text-red-400 bg-red-500/10 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; 
             }).join('');
             
             document.getElementById('cartTotal').innerText = `৳${sum}`;
-            let advance = sum > 0 ? 200 : 0;
-            if(sum < 200) advance = sum; 
+            let advance = sum > 0 ? 200 : 0; if(sum < 200) advance = sum; 
             let due = sum - advance;
             document.getElementById('cartAdvance').innerText = `- ৳${advance}`;
             document.getElementById('cartDue').innerText = `৳${due}`;
@@ -278,7 +263,7 @@
         async function processOrder() {
             if(cart.length === 0 || !user) return;
             const phone = document.getElementById('cPhone').value; const street = document.getElementById('cStreet').value; const city = document.getElementById('cCity').value; const zip = document.getElementById('cZip').value;
-            if(!phone || !street || !city) return Swal.fire('Error', 'Please fill all required delivery details.', 'error', ...swalDark);
+            if(!phone || !street || !city) return Swal.fire('Error', 'Please fill all delivery details.', 'error', ...swalDark);
             
             Swal.fire({title: 'Processing Order...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             
@@ -288,9 +273,19 @@
             if(data.success) {
                 user.balanceBdt = data.newBalance; localStorage.setItem('user', JSON.stringify(user)); 
                 cart = []; updateCartBadge(); toggleCart(); renderAuth(); renderProducts(allProducts); document.getElementById('addressSection').classList.add('hidden');
-                Swal.fire({ title: 'Order Confirmed! 🎉', html: `<p class="mb-2 text-sm text-slate-400">Advance Paid: <b>৳${data.advance}</b></p><p class="text-sm font-bold text-emerald-400">Due on Delivery: <b>৳${data.due}</b></p>`, icon: 'success', showConfirmButton: true, confirmButtonText: 'View Order Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
+                Swal.fire({ title: 'Order Sent Successfully! 🎉', html: `<p class="mb-2 text-sm text-slate-400">Advance Paid: <b>৳${data.advance}</b></p><p class="text-sm font-bold text-emerald-400">Due on Delivery: <b>৳${data.due}</b></p><p class="text-xs text-blue-400 mt-4">A digital receipt has been sent to your email.</p>`, icon: 'success', showConfirmButton: true, confirmButtonText: 'View Order Status', ...swalDark }).then((r) => { if(r.isConfirmed) openProfileDashboard('orders'); });
             } else Swal.fire({title:'Booking Failed', text: data.error, icon:'error', ...swalDark});
         }
+
+        document.getElementById('fileAvatar').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(event) { const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); const MAX_W = 256; const MAX_H = 256; let w = img.width; let h = img.height;
+                    if(w>h){if(w>MAX_W){h*=MAX_W/w; w=MAX_W;}}else{if(h>MAX_H){w*=MAX_H/h; h=MAX_H;}} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`;
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
+        });
 
         async function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
@@ -305,10 +300,15 @@
             
             fetch('/api/library/' + user.id).then(r=>r.json()).then(data => { 
                 document.getElementById('pOrdersList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No orders yet.</p>' : data.map(p => {
-                    let statusClass = p.status === 'SHIPPED' ? 'status-shipped' : (p.status === 'DELIVERED' ? 'status-delivered' : 'status-processing');
+                    let sClass = '';
+                    if(p.status === 'PENDING') sClass = 'st-pending';
+                    else if(p.status === 'RECEIVED') sClass = 'st-received';
+                    else if(p.status === 'SHIPPED') sClass = 'st-shipped';
+                    else sClass = 'st-delivered';
+
                     let varText = []; if(p.selectedSize) varText.push(p.selectedSize); if(p.selectedColor) varText.push(p.selectedColor);
                     let varStr = varText.length>0 ? `[${varText.join(' - ')}]` : '';
-                    return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-3"><div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name} <span class="text-blue-400 text-[10px] ml-1">${varStr}</span></h4><p class="text-[10px] text-slate-400 mt-1">Total: ৳${p.priceTotal} • Paid: ৳${p.advancePaid}</p></div></div><span class="status-badge ${statusClass}">${p.status}</span></div><div class="bg-slate-900/50 p-2 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To Pay on Delivery:</span><span class="text-sm font-black text-emerald-400">৳${p.dueCod}</span></div></div>`;
+                    return `<div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-3"><div class="flex justify-between items-start mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div><div><h4 class="font-bold text-sm">${p.product.name} <span class="text-blue-400 text-[10px] ml-1">${varStr}</span></h4><p class="text-[10px] text-slate-400 mt-1">Total: ৳${p.priceTotal} • Paid: ৳${p.advancePaid}</p></div></div><span class="status-badge ${sClass}">${p.status}</span></div><div class="bg-slate-900/50 p-2 rounded-xl flex justify-between items-center px-4"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To Pay on Delivery:</span><span class="text-sm font-black text-emerald-400">৳${p.dueCod}</span></div></div>`;
                 }).join(''); 
             });
             fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { document.getElementById('pFundsList').innerHTML = (!Array.isArray(data) || data.length === 0) ? '<p class="text-center text-slate-500 py-10">No transactions.</p>' : data.map(d => { let color = d.status === 'APPROVED' ? 'emerald' : d.status === 'REJECTED' ? 'red' : 'yellow'; return `<div class="bg-slate-800 p-4 rounded-2xl flex justify-between items-center border border-slate-700 mb-3"><div><p class="font-black text-sm uppercase">${d.method} <span class="text-blue-500 ml-1">৳${d.amountBdt}</span></p><p class="text-[10px] text-slate-400 font-mono mt-1">${d.trxId}</p></div><span class="bg-${color}-500/10 text-${color}-400 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-${color}-500/20">${d.status}</span></div>`; }).join(''); });

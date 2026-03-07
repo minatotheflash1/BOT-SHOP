@@ -16,7 +16,6 @@
         .tab-btn { transition: all 0.3s; } .tab-btn.active { background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #60a5fa; padding-left: 1.5rem; }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
-        
         .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
     </style>
@@ -52,7 +51,6 @@
             <button onclick="showTab('products', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-shirt mr-4 w-5"></i> Products</button>
             <button onclick="showTab('deposits', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-money-bill-transfer mr-4 w-5"></i> Deposits</button>
             <button onclick="showTab('users', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-users mr-4 w-5"></i> Users</button>
-            <button onclick="showTab('notices', this)" class="tab-btn text-left p-4 hover:bg-slate-800/40 rounded-xl font-bold text-slate-400 hover:text-white uppercase tracking-widest text-sm mb-1"><i class="fa-solid fa-bullhorn mr-4 w-5"></i> Broadcast</button>
         </div>
 
         <div class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
@@ -87,12 +85,6 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4"><h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">User Base</h1><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user email..." class="bg-slate-900/80 border border-slate-700 px-6 py-3 rounded-xl text-white outline-none font-bold w-full md:w-72"></div>
                 <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-800/40"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Name & Roles</th><th class="p-6">Email / Ref</th><th class="p-6">Wallet (BDT)</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-700/30"></tbody></table></div>
             </div>
-
-            <div id="noticesTab" class="tab-content hidden animate-[fadeIn_0.4s_ease-out]">
-                <h1 class="text-3xl md:text-4xl font-black mb-8 text-white tracking-tight">Broadcast System</h1>
-                <div class="flex flex-col md:flex-row gap-4 mb-8"><input type="text" id="noticeInput" class="flex-1 px-6 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none font-bold" placeholder="Write announcement..."><button onclick="addNotice()" class="w-full md:w-auto bg-blue-600 text-white px-8 py-4 font-black rounded-xl">Transmit</button></div>
-                <div id="noticeList" class="space-y-4"></div>
-            </div>
         </div>
     </div>
 
@@ -118,10 +110,12 @@
             
             document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
             document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} units</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
-            const nRes = await fetch('/api/notices'); const notices = await nRes.json(); document.getElementById('noticeList').innerHTML = notices.map(n => `<div class="glass-panel p-6 rounded-2xl flex justify-between items-center"><span class="text-white font-bold">${n.text}</span> <button onclick="deleteNotice(${n.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
             
-            // Render Orders
-            document.getElementById('adminOrderList').innerHTML = data.orders.map(o => `
+            // Order Viewer with Size and Color
+            document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
+                let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor);
+                let varStr = varText.length>0 ? `<br><span class="text-emerald-400 text-[10px] bg-emerald-900/30 px-2 py-1 rounded">Variant: ${varText.join(' - ')}</span>` : '';
+                return `
                 <tr class="hover:bg-slate-800/20">
                     <td class="p-6">
                         <p class="font-bold text-white mb-1">${o.user.firstName}</p>
@@ -129,7 +123,7 @@
                         <p class="text-xs text-slate-400 leading-relaxed"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> ${o.street || ''}, ${o.city || ''} - ${o.postcode || ''}</p>
                     </td>
                     <td class="p-6">
-                        <p class="font-bold text-slate-200">${o.product ? o.product.name : 'Deleted Product'}</p>
+                        <p class="font-bold text-slate-200">${o.product ? o.product.name : 'Deleted Product'} ${varStr}</p>
                         <p class="text-[10px] text-slate-500 mt-1">Order #${o.id}</p>
                     </td>
                     <td class="p-6">
@@ -139,10 +133,11 @@
                     </td>
                     <td class="p-6 text-right">
                         <span class="text-[10px] font-black px-3 py-1 rounded bg-slate-800 border border-slate-600 mb-3 inline-block">${o.status}</span><br>
-                        ${o.status === 'PROCESSING' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded mr-1 uppercase font-bold tracking-widest transition-colors shadow-lg">Mark Shipped</button>` : ''}
-                        ${o.status === 'SHIPPED' ? `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest transition-colors shadow-lg">Delivered</button>` : ''}
+                        ${o.status === 'PROCESSING' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded mr-1 uppercase font-bold tracking-widest">Mark Shipped</button>` : ''}
+                        ${o.status === 'SHIPPED' ? `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest">Delivered</button>` : ''}
                     </td>
-                </tr>`).join('');
+                </tr>`
+            }).join('');
         }
 
         function filterUsers() { const query = document.getElementById('userSearch').value.toLowerCase(); const filtered = globalUsers.filter(u => u.firstName.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query))); renderUsers(filtered); }
@@ -153,15 +148,7 @@
         async function toggleBan(id, isBanned) { if(confirm(isBanned ? 'Unban user?' : 'BAN this user?')) { await fetch('/api/admin/user/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password:pass, action:'ban', id})}); loadAllData(); } }
         async function deleteProduct(id) { if(confirm('Delete Product?')) { await fetch('/api/admin/product/'+id, { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass}) }); loadAllData(); } }
         async function actionDeposit(id, action) { await fetch('/api/admin/deposit/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, id, action}) }); loadAllData(); }
-        
-        async function updateOrderStatus(id, status) {
-            Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
-            await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) });
-            Swal.close(); loadAllData(); toast('success', `Marked as ${status}`);
-        }
-
-        async function addNotice() { const text = document.getElementById('noticeInput').value; if(!text) return; await fetch('/api/admin/notice', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass, text}) }); document.getElementById('noticeInput').value=''; loadAllData(); }
-        async function deleteNotice(id) { await fetch('/api/admin/notice/delete/'+id, { method:'POST' }); loadAllData(); }
+        async function updateOrderStatus(id, status) { Swal.fire({title: 'Updating...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark}); await fetch('/api/admin/order/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: pass, id, status}) }); Swal.close(); loadAllData(); toast('success', `Marked as ${status}`); }
     </script>
 </body>
 </html>

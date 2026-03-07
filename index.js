@@ -61,14 +61,9 @@ async function processDeposit(id, action) {
 }
 bot.action(/approve_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'APPROVE'); ctx.editMessageText(`✅ ${res.msg}`); });
 bot.action(/reject_(.+)/, async (ctx) => { const res = await processDeposit(parseInt(ctx.match[1]), 'REJECT'); ctx.editMessageText(`❌ ${res.msg}`); });
-
-async function updateOrderTelegram(ctx, status, icon) {
-    const id = parseInt(ctx.match[1]); await prisma.purchase.update({ where: { id }, data: { status } });
-    const msgText = ctx.callbackQuery.message.text; ctx.editMessageText(`${msgText}\n\n${icon} *STATUS UPDATED: ${status}*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(`Marked as ${status}`);
-}
-bot.action(/receive_(.+)/, (ctx) => updateOrderTelegram(ctx, 'RECEIVED', '📥'));
-bot.action(/ship_(.+)/, (ctx) => updateOrderTelegram(ctx, 'SHIPPED', '🚚'));
-bot.action(/deliver_(.+)/, (ctx) => updateOrderTelegram(ctx, 'DELIVERED', '✅'));
+bot.action(/receive_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'RECEIVED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n📥 *STATUS UPDATED: RECEIVED*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(`Marked as RECEIVED`); });
+bot.action(/ship_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'SHIPPED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n🚚 *STATUS UPDATED: SHIPPED*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(`Marked as SHIPPED`); });
+bot.action(/deliver_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'DELIVERED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n✅ *STATUS UPDATED: DELIVERED*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(`Marked as DELIVERED`); });
 
 const emailHeader = `<div style="max-width: 600px; margin: 0 auto; background-color: #0b1121; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; font-family: Arial, sans-serif;"><div style="background-color: #2563eb; padding: 20px; text-align: center;"><h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">AURA STORE</h1></div><div style="padding: 30px; color: #e2e8f0;">`;
 const emailFooter = `</div><div style="background-color: #0f172a; padding: 15px; text-align: center; border-top: 1px solid #1e293b;"><p style="color: #64748b; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} AURA STORE.</p></div></div>`;
@@ -83,7 +78,6 @@ app.post('/api/register', async (req, res) => {
         if (refCode) { const r = await prisma.user.findUnique({ where: { refCode: refCode.toUpperCase() } }); if (r) { referredBy = r.refCode; await prisma.user.update({ where: { id: r.id }, data: { refCount: { increment: 1 } } }); } }
         const verifyToken = crypto.randomBytes(32).toString('hex');
         await prisma.user.create({ data: { firstName: name, email, password, country, refCode: generateRefCode(), referredBy, ipAddress: ip, verifyToken, isVerified: false } });
-        if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `🆕 *NEW USER*\nName: ${name}\nEmail: ${email}\nIP: \`${ip}\``, { parse_mode: 'Markdown' }).catch(e => {});
         const host = req.headers['x-forwarded-host'] || req.get('host'); const verifyLink = `https://${host}/api/verify-email/${verifyToken}`;
         const mailOptions = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: email, subject: 'Verify Your Identity', html: `${emailHeader}<h2 style="color: #ffffff;">Welcome, ${name}!</h2><p>Please verify your email:</p><div style="text-align: center; margin: 30px 0;"><a href="${verifyLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">VERIFY ACCOUNT</a></div><p style="background-color: #1e293b; padding: 10px; border-radius: 5px; word-break: break-all; color: #3b82f6; font-size: 12px;">${verifyLink}</p>${emailFooter}` };
         if(process.env.EMAIL_USER && process.env.EMAIL_PASS) await transporter.sendMail(mailOptions);
@@ -152,20 +146,14 @@ app.post('/api/checkout', async (req, res) => {
     } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); }
 });
 
-// 🔥 NEW: RIDER REGISTRATION & VERIFICATION APIs
+// 🔥 RIDER FULL APIs (Profile, History, Badges)
 app.post('/api/rider/register', async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
         const verifyToken = crypto.randomBytes(32).toString('hex');
         await prisma.rider.create({ data: { name, email, phone, password, verifyToken, isVerified: false } });
-        
-        const host = req.headers['x-forwarded-host'] || req.get('host');
-        const verifyLink = `https://${host}/api/rider/verify-email/${verifyToken}`;
-        
-        const mailOptions = { 
-            from: `"AURA LOGISTICS" <${process.env.EMAIL_USER}>`, to: email, subject: 'Verify Rider Account', 
-            html: `${emailHeader}<h2 style="color: #ffffff;">Welcome Rider, ${name}!</h2><p>Please verify your account:</p><div style="text-align: center; margin: 30px 0;"><a href="${verifyLink}" style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">VERIFY RIDER ACCOUNT</a></div>${emailFooter}` 
-        };
+        const host = req.headers['x-forwarded-host'] || req.get('host'); const verifyLink = `https://${host}/api/rider/verify-email/${verifyToken}`;
+        const mailOptions = { from: `"AURA LOGISTICS" <${process.env.EMAIL_USER}>`, to: email, subject: 'Verify Rider Account', html: `${emailHeader}<h2 style="color: #ffffff;">Welcome Rider, ${name}!</h2><p>Please verify your account:</p><div style="text-align: center; margin: 30px 0;"><a href="${verifyLink}" style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">VERIFY RIDER ACCOUNT</a></div>${emailFooter}` };
         if(process.env.EMAIL_USER && process.env.EMAIL_PASS) await transporter.sendMail(mailOptions);
         res.json({ success: true, message: 'Check email to verify account.' });
     } catch(e) { res.status(400).json({ success: false, error: 'Email already exists.' }); }
@@ -183,60 +171,65 @@ app.post('/api/rider/login', async (req, res) => {
         const rider = await prisma.rider.findUnique({ where: { email: req.body.email } });
         if (rider && rider.password === req.body.password) {
             if(!rider.isVerified) return res.status(403).json({ success: false, error: 'Please verify your email.' });
-            res.json({ success: true, rider: { id: rider.id, name: rider.name, email: rider.email, phone: rider.phone } });
+            res.json({ success: true, rider: { id: rider.id } }); // Only send ID back, fetch real data via /me
         } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); }
     } catch(e) { res.status(500).json({ success: false, error: 'Server error' }); }
 });
 
-app.post('/api/rider/orders', async (req, res) => {
+app.post('/api/rider/me', async (req, res) => {
     try {
         const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } });
-        if(!rider) return res.status(403).json({ error: 'Unauthorized' });
+        if(rider) res.json({ success: true, rider: { id: rider.id, name: rider.name, email: rider.email, phone: rider.phone, avatar: rider.avatar, deliveryCount: rider.deliveryCount } });
+        else res.json({ success: false });
+    } catch(e) { res.json({ success: false }); }
+});
+
+app.post('/api/rider/update', async (req, res) => {
+    const { riderId, email, password, avatar } = req.body;
+    try {
+        const data = {}; if (email) data.email = email; if (password) data.password = password; if (avatar !== undefined) data.avatar = avatar;
+        await prisma.rider.update({ where: { id: parseInt(riderId) }, data });
+        res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: 'Update failed.' }); }
+});
+
+app.post('/api/rider/orders', async (req, res) => {
+    try {
         const orders = await prisma.purchase.findMany({ where: { status: 'SHIPPED' }, include: { user: true, product: true }, orderBy: { createdAt: 'asc' } });
         res.json({ success: true, orders });
     } catch(e) { res.json({ success: false }); }
 });
 
-// 🔥 NEW: SEND OTP WITH RECEIPT & RIDER INFO
+app.post('/api/rider/history', async (req, res) => {
+    try {
+        const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } });
+        if(!rider) return res.json({success: false});
+        const history = await prisma.purchase.findMany({ where: { status: 'DELIVERED', deliveredBy: rider.name }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } });
+        res.json({ success: true, history });
+    } catch(e) { res.json({ success: false }); }
+});
+
 app.post('/api/rider/send-otp', async (req, res) => {
     try {
         const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } });
         if(!rider) return res.status(403).json({error: 'Unauthorized'});
-
         const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } });
         if (!purchase) return res.json({ success: false, error: 'Order not found' });
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         await prisma.purchase.update({ where: { id: purchase.id }, data: { deliveryOtp: otp } });
-
         const varText = []; if(purchase.selectedSize) varText.push(purchase.selectedSize); if(purchase.selectedColor) varText.push(purchase.selectedColor);
         const varStr = varText.length > 0 ? `[${varText.join(', ')}]` : '';
 
         const mailOptions = {
             from: `"AURA DELIVERY" <${process.env.EMAIL_USER}>`, to: purchase.user.email, subject: `Delivery Verification Code: ${otp}`,
-            html: `${emailHeader}
-                <h2 style="color: #10b981; margin-bottom: 5px;">Your Order is at your door! 📦</h2>
-                <p style="color: #94a3b8;">Our verified rider <b>${rider.name}</b> (Phone: ${rider.phone}) is waiting to deliver your order.</p>
-                <div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                    <h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Receipt details</h3>
-                    <p style="margin: 5px 0; color: #cbd5e1;">• ${purchase.product.name} ${varStr}</p>
-                    <div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;">
-                        <p style="margin: 5px 0; color: #e2e8f0;">Total Price: ৳${purchase.priceTotal}</p>
-                        <p style="margin: 5px 0; color: #34d399;">Advance Paid: ৳${purchase.advancePaid}</p>
-                        <p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Cash to Pay (COD): ৳${purchase.dueCod}</strong></p>
-                    </div>
-                </div>
-                <p>Share this code with the rider to receive your product:</p>
-                <h1 style="color:#3b82f6;text-align:center;font-size:40px;letter-spacing:10px;">${otp}</h1>
-                <p style="color: #ef4444; font-size: 12px; text-align: center;">Do not share this code before receiving the product.</p>
-                ${emailFooter}`
+            html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Your Order is at your door! 📦</h2><p style="color: #94a3b8;">Our verified rider <b>${rider.name}</b> (Phone: ${rider.phone}) is waiting to deliver your order.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Receipt details</h3><p style="margin: 5px 0; color: #cbd5e1;">• ${purchase.product.name} ${varStr}</p><div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;">Total Price: ৳${purchase.priceTotal}</p><p style="margin: 5px 0; color: #34d399;">Advance Paid: ৳${purchase.advancePaid}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Cash to Pay (COD): ৳${purchase.dueCod}</strong></p></div></div><p>Share this code with the rider to receive your product:</p><h1 style="color:#3b82f6;text-align:center;font-size:40px;letter-spacing:10px;">${otp}</h1><p style="color: #ef4444; font-size: 12px; text-align: center;">Do not share this code before receiving the product.</p>${emailFooter}`
         };
         if(process.env.EMAIL_USER && process.env.EMAIL_PASS) await transporter.sendMail(mailOptions);
         res.json({ success: true });
     } catch(e) { res.json({ success: false, error: 'Failed to send OTP' }); }
 });
 
-// 🔥 NEW: VERIFY OTP & SEND TELEGRAM LOG WITH RIDER NAME
 app.post('/api/rider/order/action', async (req, res) => {
     try {
         const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } });
@@ -245,7 +238,9 @@ app.post('/api/rider/order/action', async (req, res) => {
         const purchase = await prisma.purchase.findUnique({ where: { id: parseInt(req.body.orderId) }, include: { user: true, product: true } });
         if (purchase.deliveryOtp && purchase.deliveryOtp !== req.body.otp) { return res.json({ success: false, error: 'Invalid OTP Code!' }); }
 
+        // 🔥 Mark Delivered & Increment Rider Delivery Count
         await prisma.purchase.update({ where: { id: parseInt(req.body.orderId) }, data: { status: 'DELIVERED', deliveryOtp: null, deliveredBy: rider.name } });
+        await prisma.rider.update({ where: { id: rider.id }, data: { deliveryCount: { increment: 1 } } });
         
         if(ADMIN_ID) {
             const msg = `✅ *ORDER DELIVERED*\n\n📦 *Order ID:* #${purchase.id}\n🛒 *Product:* ${purchase.product.name}\n👤 *Customer:* ${purchase.user.firstName}\n🚴 *Delivered By:* ${rider.name} (${rider.phone})\n💰 *Cash Collected:* ৳${purchase.dueCod}`;
@@ -264,7 +259,6 @@ app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purc
 app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
 app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) bot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
 
-// Admin APIs
 app.post('/api/admin/login', (req, res) => { if (req.body.password === (process.env.ADMIN_PASSWORD || 'Ananto01@$')) res.json({ success: true }); else res.status(401).json({ success: false }); });
 app.get('/api/admin/stats', async (req, res) => { const recentPurchases = await prisma.purchase.findMany({ include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); let revenue = recentPurchases.reduce((acc, p) => acc + p.advancePaid, 0); res.json({ users: await prisma.user.count(), deposits: await prisma.deposit.findMany({ include: { user: true }, take: 20, orderBy: { createdAt: 'desc' } }), products: await prisma.product.findMany(), userList: await prisma.user.findMany({ take: 20, orderBy: { createdAt: 'desc' } }), orders: recentPurchases, revenue }); });
 app.post('/api/admin/order/action', async (req, res) => { if (req.body.password !== (process.env.ADMIN_PASSWORD || 'Ananto01@$')) return res.status(403).json({ error: 'Unauthorized' }); await prisma.purchase.update({ where: { id: parseInt(req.body.id) }, data: { status: req.body.status } }); res.json({success:true}); });

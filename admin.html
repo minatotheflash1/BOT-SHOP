@@ -18,6 +18,12 @@
         .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
         .sidebar-open { transform: translateX(0); } .sidebar-closed { transform: translateX(-100%); }
         @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
+        
+        .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; }
+        .st-pending { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #facc15; }
+        .st-received { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #60a5fa; }
+        .st-shipped { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid #c084fc; }
+        .st-delivered { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #34d399; }
     </style>
 </head>
 <body class="h-screen overflow-hidden selection:bg-blue-500 selection:text-white bg-grid relative flex flex-col md:flex-row">
@@ -62,7 +68,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Users</p><h2 class="text-5xl font-black text-white" id="statUsers">0</h2></div>
-                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Sales (Advance Collected)</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
+                    <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-emerald-500"><p class="text-slate-400 font-black mb-1 uppercase tracking-widest text-xs">Total Advance Collected</p><h2 class="text-5xl font-black text-emerald-400" id="statRev">৳0</h2></div>
                 </div>
             </div>
 
@@ -111,10 +117,27 @@
             document.getElementById('depositListBody').innerHTML = data.deposits.map(d => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${d.user.firstName}</td><td class="p-6 text-sm text-slate-400 font-mono">${d.trxId}<br><span class="text-blue-400 font-black text-xs uppercase">${d.method}</span></td><td class="p-6 font-black text-emerald-400 text-lg">৳${d.amountBdt}</td><td class="p-6 text-right">${d.status === 'PENDING' ? `<button onclick="actionDeposit(${d.id}, 'APPROVE')" class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg font-bold text-xs mr-2 hover:bg-emerald-500 hover:text-white">Approve</button><button onclick="actionDeposit(${d.id}, 'REJECT')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-500 hover:text-white">Reject</button>` : `<span class="font-black text-[10px] text-slate-500">${d.status}</span>`}</td></tr>`).join('');
             document.getElementById('adminProductList').innerHTML = data.products.map(p => `<tr class="hover:bg-slate-800/20"><td class="p-6 font-bold text-white">${p.name}</td><td class="p-6 text-blue-400 font-black text-lg">৳${p.price}</td><td class="p-6 text-slate-400 font-bold">${p.stock} units</td><td class="p-6 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-400 p-2 bg-red-500/10 rounded-lg"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             
-            // Order Viewer with Size and Color
+            // 🔥 ORDER WORKFLOW BUTTONS
             document.getElementById('adminOrderList').innerHTML = data.orders.map(o => {
                 let varText = []; if(o.selectedSize) varText.push(o.selectedSize); if(o.selectedColor) varText.push(o.selectedColor);
                 let varStr = varText.length>0 ? `<br><span class="text-emerald-400 text-[10px] bg-emerald-900/30 px-2 py-1 rounded">Variant: ${varText.join(' - ')}</span>` : '';
+                
+                let sClass = '';
+                if(o.status === 'PENDING') sClass = 'st-pending';
+                else if(o.status === 'RECEIVED') sClass = 'st-received';
+                else if(o.status === 'SHIPPED') sClass = 'st-shipped';
+                else sClass = 'st-delivered';
+
+                let actionBtns = '';
+                if(o.status === 'PENDING') {
+                    actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'RECEIVED')" class="text-[10px] bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest shadow-lg transition-colors w-full mb-1"><i class="fa-solid fa-hand-holding-box"></i> Receive Order</button>`;
+                } else if(o.status === 'RECEIVED') {
+                    actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest shadow-lg transition-colors w-full mb-1"><i class="fa-solid fa-truck-fast"></i> Mark Shipped</button>
+                                  <button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest shadow-lg transition-colors w-full"><i class="fa-solid fa-check"></i> Delivered</button>`;
+                } else if(o.status === 'SHIPPED') {
+                    actionBtns = `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest shadow-lg transition-colors w-full"><i class="fa-solid fa-check"></i> Delivered</button>`;
+                }
+
                 return `
                 <tr class="hover:bg-slate-800/20">
                     <td class="p-6">
@@ -131,10 +154,9 @@
                         <p class="text-xs text-slate-400 mb-1">Advance: <span class="text-emerald-400 font-bold">৳${o.advancePaid}</span></p>
                         <p class="text-xs text-slate-400">Due (COD): <span class="text-red-400 font-black">৳${o.dueCod}</span></p>
                     </td>
-                    <td class="p-6 text-right">
-                        <span class="text-[10px] font-black px-3 py-1 rounded bg-slate-800 border border-slate-600 mb-3 inline-block">${o.status}</span><br>
-                        ${o.status === 'PROCESSING' ? `<button onclick="updateOrderStatus(${o.id}, 'SHIPPED')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded mr-1 uppercase font-bold tracking-widest">Mark Shipped</button>` : ''}
-                        ${o.status === 'SHIPPED' ? `<button onclick="updateOrderStatus(${o.id}, 'DELIVERED')" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded uppercase font-bold tracking-widest">Delivered</button>` : ''}
+                    <td class="p-6 text-right align-top">
+                        <span class="status-pill ${sClass} mb-3">${o.status}</span><br>
+                        ${actionBtns}
                     </td>
                 </tr>`
             }).join('');

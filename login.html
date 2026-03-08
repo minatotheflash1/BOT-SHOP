@@ -7,22 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; background: #050b14; color: white; overflow: hidden; }
         
-        /* Floating Blobs */
         .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(90px); opacity: 0.4; animation: float 15s infinite alternate ease-in-out; }
         .blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #3b82f6; }
         .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: #8b5cf6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
-
-        /* Animations */
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-right { animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
         .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; color: white; outline: none; }
@@ -32,13 +25,19 @@
         
         .split-left { background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(124,58,237,0.2)); backdrop-filter: blur(10px); border-right: 1px solid rgba(255,255,255,0.05); }
         @media (max-width: 1024px) { .split-left { height: 30vh; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } .split-right { height: 70vh; } }
+
+        /* 🔥 FIXED ANIMATIONS (No more opacity bugs) */
+        @keyframes slideInUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { 0% { opacity: 0; transform: translateX(20px); } 100% { opacity: 1; transform: translateX(0); } }
+        .anim-ready { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-tab { animation: slideInRight 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col lg:flex-row">
 
     <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
-    <div class="split-left w-full lg:w-1/2 flex flex-col justify-center items-center p-12 relative z-10 animate-slide-up">
+    <div class="split-left w-full lg:w-1/2 flex flex-col justify-center items-center p-12 relative z-10 anim-ready">
         <div class="text-center">
             <div class="w-24 h-24 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.6)] text-white mb-6 transform hover:rotate-12 transition-transform duration-500">
                 <i class="fa-solid fa-shirt text-4xl"></i>
@@ -49,13 +48,13 @@
     </div>
 
     <div class="split-right w-full lg:w-1/2 flex justify-center items-start lg:items-center p-6 sm:p-12 z-10 overflow-y-auto custom-scrollbar">
-        <div class="glass-panel w-full max-w-md p-8 rounded-[32px] shadow-2xl animate-slide-up" style="animation-delay: 0.2s; opacity: 0;">
+        <div class="glass-panel w-full max-w-md p-8 rounded-[32px] shadow-2xl anim-ready" style="animation-delay: 0.1s;">
             <div class="flex gap-6 mb-8 border-b border-slate-700/50">
                 <button id="loginTab" onclick="switchTab('login')" class="pb-3 font-black uppercase tracking-widest text-sm tab-active transition-all w-1/2">Login</button>
                 <button id="regTab" onclick="switchTab('reg')" class="pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white">Register</button>
             </div>
 
-            <div id="loginSection" class="space-y-5 animate-slide-right">
+            <div id="loginSection" class="space-y-5 anim-tab">
                 <h2 class="text-2xl font-black mb-2">Welcome Back</h2>
                 <p class="text-xs text-slate-400 font-bold mb-6">Enter your credentials to access the store.</p>
                 <input type="email" id="lEmail" placeholder="Email Address" class="input-box w-full p-4 rounded-xl font-bold">
@@ -81,20 +80,16 @@
         function switchTab(t) {
             const loginSec = document.getElementById('loginSection'); const regSec = document.getElementById('regSection');
             loginSec.classList.add('hidden'); regSec.classList.add('hidden');
-            loginSec.classList.remove('animate-slide-right'); regSec.classList.remove('animate-slide-right');
+            loginSec.classList.remove('anim-tab'); regSec.classList.remove('anim-tab');
             
             document.getElementById('loginTab').className = 'pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white'; 
             document.getElementById('regTab').className = 'pb-3 font-black uppercase tracking-widest text-sm tab-inactive transition-all w-1/2 hover:text-white';
             
             if(t === 'login') { 
-                loginSec.classList.remove('hidden'); 
-                void loginSec.offsetWidth; // trigger reflow
-                loginSec.classList.add('animate-slide-right'); 
+                loginSec.classList.remove('hidden'); void loginSec.offsetWidth; loginSec.classList.add('anim-tab'); 
                 document.getElementById('loginTab').classList.replace('tab-inactive', 'tab-active'); 
             } else { 
-                regSec.classList.remove('hidden'); 
-                void regSec.offsetWidth; 
-                regSec.classList.add('animate-slide-right'); 
+                regSec.classList.remove('hidden'); void regSec.offsetWidth; regSec.classList.add('anim-tab'); 
                 document.getElementById('regTab').classList.replace('tab-inactive', 'tab-active'); 
             }
         }
@@ -103,20 +98,26 @@
             const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; 
             if(!email || !password) return; 
             const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...'; 
-            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) }); 
-            const data = await res.json(); btn.innerHTML = 'Enter Store <i class="fa-solid fa-arrow-right ml-2"></i>'; 
-            if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); document.body.style.opacity = 0; setTimeout(()=>location.href = '/', 300); } 
-            else Swal.fire({title: 'Error', text: data.error || 'Invalid credentials', icon: 'error', ...swalDark}); 
+            try {
+                const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, password}) }); 
+                if(res.status === 503) { Swal.fire('Maintenance', 'System is undergoing upgrades.', 'info'); btn.innerHTML = 'Enter Store <i class="fa-solid fa-arrow-right ml-2"></i>'; return setTimeout(()=>location.reload(true), 1500); }
+                const data = await res.json(); btn.innerHTML = 'Enter Store <i class="fa-solid fa-arrow-right ml-2"></i>'; 
+                if(data.success) { localStorage.setItem('user', JSON.stringify(data.user)); document.body.style.opacity = 0; setTimeout(()=>location.href = '/', 300); } 
+                else Swal.fire({title: 'Error', text: data.error || 'Invalid credentials', icon: 'error', ...swalDark}); 
+            } catch(e) { btn.innerHTML = 'Enter Store'; Swal.fire('Error', 'Network Error', 'error'); }
         }
 
         async function handleRegister() { 
             const name = document.getElementById('rName').value; const email = document.getElementById('rEmail').value; const password = document.getElementById('rPass').value; const refCode = document.getElementById('rRef').value; 
             if(!name || !email || !password) return; 
             const btn = document.getElementById('btnReg'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...'; 
-            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country:'BD', refCode}) }); 
-            const data = await res.json(); btn.innerHTML = 'Sign Up'; 
-            if(data.success) { confetti({ particleCount: 150, spread: 80 }); Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } 
-            else Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); 
+            try {
+                const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password, country:'BD', refCode}) }); 
+                if(res.status === 503) { Swal.fire('Maintenance', 'System is undergoing upgrades.', 'info'); btn.innerHTML = 'Sign Up'; return setTimeout(()=>location.reload(true), 1500); }
+                const data = await res.json(); btn.innerHTML = 'Sign Up'; 
+                if(data.success) { Swal.fire({title: 'Verification Sent!', text: data.message, icon: 'success', ...swalDark}); switchTab('login'); } 
+                else Swal.fire({title: 'Error', text: data.error || 'Registration failed', icon: 'error', ...swalDark}); 
+            } catch(e) { btn.innerHTML = 'Sign Up'; Swal.fire('Error', 'Network Error', 'error'); }
         }
     </script>
 </body>

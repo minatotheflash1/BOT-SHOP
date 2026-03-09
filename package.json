@@ -1,11 +1,11 @@
 {
   "name": "aura-store",
   "version": "1.0.0",
-  "description": "Aura Store Next-Gen Platform",
+  "description": "Aura Store",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npx prisma generate",
-    "start": "npx prisma db push && node index.js"
+    "build": "npx prisma generate",
+    "start": "npx prisma db push --accept-data-loss && node index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",

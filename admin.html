@@ -20,8 +20,6 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
         @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fade 0.4s ease-out forwards; }
-        .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border-radius: 12px; border: 1px solid #334155; }
-        .leaflet-popup-tip { background: #1e293b; }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col md:flex-row relative">
@@ -121,14 +119,17 @@
 
             <div id="adminsTab" class="tab-content hidden animate-fade">
                 <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
+                
                 <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
                 <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+
                 <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2>
                 <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
             </div>
 
             <div id="storectrlTab" class="tab-content hidden animate-fade">
                 <h1 class="text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-store mr-3"></i>Web Controls</h1>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="glass-panel p-6 rounded-[32px]">
                         <h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3>
@@ -144,6 +145,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="glass-panel p-6 rounded-[32px]">
                     <h3 class="text-xl font-black text-white mb-4">Add Product</h3>
                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -204,13 +206,18 @@
             } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: 'Access Denied', ...swalDark, showConfirmButton:false, timer:1500}); } 
         }
 
+        // 🔥 REGISTRATION FLOW WITH LOCATION & OTP
         async function requestAdminOTP() {
             const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const pass = document.getElementById('regPass').value;
             if(!name || !email || !pass) return Swal.fire('Error', 'Fill all fields', 'error', swalDark);
+            
+            // Get Location
             Swal.fire({title: 'Detecting Location...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     tempRegLocation = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                    
+                    // Send OTP Request
                     const res = await fetch('/api/admin/register/otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email}) });
                     const data = await res.json();
                     if(data.success) {
@@ -229,8 +236,9 @@
             Swal.fire({title: 'Submitting...', didOpen: ()=>Swal.showLoading(), ...swalDark});
             const res = await fetch('/api/admin/register/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password: pass, location: tempRegLocation, otp}) });
             const data = await res.json();
-            if(data.success) { Swal.fire('Application Sent!', 'Please wait for Owner approval via Telegram or Dashboard.', 'success', swalDark).then(()=>toggleAuthForm()); } 
-            else { Swal.fire('Error', data.error, 'error', swalDark); }
+            if(data.success) {
+                Swal.fire('Application Sent!', 'Please wait for Owner approval via Telegram or Dashboard.', 'success', swalDark).then(()=>toggleAuthForm());
+            } else { Swal.fire('Error', data.error, 'error', swalDark); }
         }
 
         async function checkAuth() { 
@@ -246,6 +254,7 @@
         function showTab(tabId, btnElement) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.remove('hidden'); if(btnElement) btnElement.classList.add('active'); }
         function logout() { sessionStorage.clear(); location.reload(); }
 
+        // Owner Controls
         async function loadConfig() {
             if(currentRole !== 'OWNER') return;
             try { const res = await fetch('/api/store-config'); const data = await res.json();
@@ -256,7 +265,6 @@
             await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated', ...swalDark, showConfirmButton:false, timer:2000});
         }
-        
         async function ownerAction(action) {
             let body = { email: adminEmail, password: adminPass, action };
             if(action === 'add_notice') body.text = document.getElementById('noticeText').value;

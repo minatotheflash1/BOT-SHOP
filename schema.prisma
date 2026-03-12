@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -145,7 +146,6 @@ model StoreConfig {
   tgLink      String   @default("https://t.me/minato_namikaze143")
 }
 
-// 🔥 NEW: SYSTEM ADMINS (Created by Owner)
 model SystemAdmin {
   id        Int      @id @default(autoincrement())
   name      String

@@ -39,12 +39,12 @@ model User {
   isVip              Boolean    @default(false)
   vipExpiry          DateTime?
   isBanned           Boolean    @default(false)
-  role               String     @default("USER")
+  role               String     @default("USER") // USER, ADMIN, OWNER
   avatar             String?
   isVerified         Boolean    @default(false)
   verifyToken        String?
-  resetToken         String?
-  resetCode          String?    
+  resetToken         String?    // 🔥 FORGOT PASS LINK
+  resetCode          String?    // 🔥 FORGOT PASS OTP
   resetExpiry        DateTime?
   deposits           Deposit[] 
   purchases          Purchase[] 
@@ -66,7 +66,7 @@ model Rider {
   lastLocUpdate DateTime? 
   isVerified    Boolean  @default(false)
   verifyToken   String?
-  withdraws     RiderWithdraw[] // 🔥 NEW
+  withdraws     RiderWithdraw[] 
   createdAt     DateTime @default(now())
 }
 
@@ -125,7 +125,6 @@ model FlashSale {
   discountPercent Int      @default(0)
 }
 
-// 🔥 NEW RIDER WITHDRAW SYSTEM
 model RiderWithdraw {
   id        Int      @id @default(autoincrement())
   riderId   Int
@@ -133,6 +132,16 @@ model RiderWithdraw {
   amount    Float
   method    String
   number    String
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status    String   @default("PENDING") 
   createdAt DateTime @default(now())
+}
+
+// 🔥 NEW: ADMIN / OWNER INFO CONFIG
+model StoreConfig {
+  id          Int      @id @default(1)
+  ownerName   String   @default("Ononto Hasan")
+  ownerPhone  String   @default("+880 1000000000")
+  ownerBio    String   @default("Founder & Freestyle Player")
+  fbLink      String   @default("https://facebook.com/yours.ononto")
+  tgLink      String   @default("https://t.me/minato_namikaze143")
 }

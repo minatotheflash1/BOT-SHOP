@@ -54,7 +54,7 @@
 
     <div id="flashBanner" class="hidden bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs font-bold py-1.5 text-center shadow-lg relative z-50 animate-fade-in"><i class="fa-solid fa-bolt text-yellow-300 mr-2"></i> FLASH SALE ENDS IN: <span id="countdownTimer" class="font-mono text-yellow-300 ml-2">00:00:00</span></div>
     
-    <div id="noticeWrapper" class="hidden ticker-wrap w-full overflow-hidden bg-gradient-to-r from-[#0f172a] to-[#1e293b] border-b border-[#3b82f6] flex items-center h-10 relative z-40">
+    <div id="noticeWrapper" class="hidden w-full overflow-hidden bg-gradient-to-r from-[#0f172a] to-[#1e293b] border-b border-[#3b82f6] flex items-center h-10 relative z-40">
         <div class="bg-[#3b82f6] color-white font-black px-5 h-full flex items-center z-10 relative shadow-[5px_0_15px_rgba(0,0,0,0.5)] uppercase text-xs tracking-widest text-white"><i class="fa-solid fa-bullhorn animate-pulse text-yellow-300 mr-2"></i> UPDATES</div>
         <div class="inline-block whitespace-nowrap pl-full animate-[tickerAnim_15s_linear_infinite] hover:animate-play-state-paused" id="noticeText"></div>
     </div>
@@ -62,10 +62,15 @@
 
     <nav class="sticky top-0 z-50 w-full h-16 sm:h-20 flex items-center px-4 shadow-lg transition-colors" style="background: var(--glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);">
         <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
-            <div class="flex items-center gap-2 cursor-pointer group" onclick="location.reload()">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white"><i class="fa-solid fa-shirt text-xl"></i></div>
-                <span class="font-black text-2xl tracking-tighter hidden sm:block">AURA<span class="text-blue-500">STORE</span></span>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-white text-2xl mr-2"><i class="fa-solid fa-bars"></i></button>
+                <div class="flex items-center gap-2 cursor-pointer group" onclick="location.reload()">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white"><i class="fa-solid fa-shirt text-xl"></i></div>
+                    <span class="font-black text-2xl tracking-tighter hidden sm:block">AURA<span class="text-blue-500">STORE</span></span>
+                </div>
             </div>
+
             <div class="flex items-center gap-3">
                 <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-[var(--card)] border border-[var(--border)] text-[var(--text)] transition-colors"><i id="themeIcon" class="fa-solid fa-sun text-yellow-400"></i></button>
                 <div id="authSection" class="flex items-center gap-3"></div>
@@ -73,8 +78,24 @@
         </div>
     </nav>
 
-    <button onclick="openAdminInfo()" id="btnAdminInfo" class="fab animate-slide-up" title="Admin Support & Info"><i class="fa-solid fa-headset text-xl"></i></button>
-    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-robot text-xl"></i></button>
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black/60 z-[90] hidden" onclick="toggleMobileMenu()"></div>
+    <div id="mobileMenu" class="fixed inset-y-0 left-0 bg-[var(--card)] w-72 z-[100] transform -translate-x-full transition-transform duration-300 shadow-2xl border-r border-[var(--border)] flex flex-col">
+        <div class="p-5 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg)]">
+            <span class="font-black text-xl tracking-tighter text-white">AURA<span class="text-blue-500">STORE</span></span>
+            <button onclick="toggleMobileMenu()" class="text-xl text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            <button onclick="location.reload()" class="w-full text-left p-4 rounded-xl font-bold text-slate-300 hover:bg-[var(--bg)] hover:text-white transition-colors"><i class="fa-solid fa-house mr-3 text-blue-500"></i> Home Store</button>
+            <button onclick="toggleMobileMenu(); openAdminInfo()" class="w-full text-left p-4 rounded-xl font-bold text-slate-300 hover:bg-[var(--bg)] hover:text-white transition-colors"><i class="fa-solid fa-id-badge mr-3 text-yellow-500"></i> Admin Support</button>
+            <button onclick="toggleMobileMenu(); openFeedback()" class="w-full text-left p-4 rounded-xl font-bold text-slate-300 hover:bg-[var(--bg)] hover:text-white transition-colors"><i class="fa-solid fa-comment-dots mr-3 text-indigo-500"></i> Leave Feedback</button>
+        </div>
+        <div class="p-4 border-t border-[var(--border)]">
+            <button onclick="location.href='/rider'" class="w-full bg-emerald-500/10 text-emerald-500 font-bold p-4 rounded-xl border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-solid fa-motorcycle mr-2"></i> Rider Login</button>
+        </div>
+    </div>
+
+    <button onclick="openAdminInfo()" id="btnAdminInfo" class="fab animate-slide-up hidden md:flex" title="Admin Support & Info"><i class="fa-solid fa-id-badge text-xl"></i></button>
+    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-headset text-xl"></i></button>
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div id="chatWindow">
@@ -121,7 +142,7 @@
         <div class="bg-[var(--card)] w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl border border-[var(--border)] animate-slide-up text-center">
             <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 relative border-b border-slate-700">
                 <button onclick="document.getElementById('adminInfoModal').style.display='none'" class="absolute top-4 right-4 w-8 h-8 bg-white/10 text-white rounded-full hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
-                <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-2xl text-black shadow-[0_0_20px_rgba(250,204,21,0.5)] mb-3"><i class="fa-solid fa-crown"></i></div>
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-2xl text-black shadow-[0_0_20px_rgba(250,204,21,0.5)] mb-3"><i class="fa-solid fa-id-badge"></i></div>
                 <h2 class="text-2xl font-black text-white" id="oName">Loading...</h2>
                 <p class="text-xs font-bold text-yellow-400 mt-1 uppercase tracking-widest">Store Founder & Owner</p>
                 <p class="text-slate-400 text-sm mt-3 italic" id="oBio">...</p>
@@ -156,8 +177,7 @@
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[var(--bg)] text-[var(--text)]">
                 
                 <div id="sec-overview" class="space-y-6 text-center">
-                    <div id="pAvatarContainer" class="relative mx-auto mb-6 w-24 h-24 mt-2">
-                        </div>
+                    <div id="pAvatarContainer" class="relative mx-auto mb-6 w-24 h-24 mt-2"></div>
                     <div><h3 class="text-3xl font-black flex justify-center items-center flex-wrap gap-2" id="pNameContainer"></h3></div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-6 py-3 rounded-xl transition-colors font-black uppercase tracking-widest mt-4 border border-red-500/20"><i class="fa-solid fa-right-from-bracket mr-2"></i> Secure Logout</button>
                 </div>
@@ -182,12 +202,15 @@
                     </div>
                     
                     <div class="border-t border-[var(--border)] pt-5 mt-2">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1 text-red-500"><i class="fa-solid fa-shield-halved"></i> Secure Password Change (OTP Required)</label>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1 text-red-500"><i class="fa-solid fa-shield-halved"></i> Secure Password Change</label>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <input type="password" id="setPass" placeholder="Enter new password" class="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--text)] rounded-xl px-4 py-3 font-bold outline-none focus:border-red-500 transition-colors">
-                            <button onclick="sendProfileOTP()" id="btnSendOtp" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl whitespace-nowrap shadow-md transition-colors hidden uppercase text-xs tracking-widest">Get OTP Code</button>
+                            <button onclick="sendProfileOTP()" id="btnSendOtp" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl whitespace-nowrap shadow-md transition-colors hidden uppercase text-xs tracking-widest">Send OTP</button>
                         </div>
-                        <p class="text-[10px] font-bold text-slate-400 mt-2 hidden" id="otpNotice">A 6-digit OTP code will be sent to your email to verify this change.</p>
+                        <div id="profileOtpArea" class="hidden mt-3">
+                            <input type="text" id="verifyOtp" placeholder="Enter 6-Digit OTP received in Email" class="w-full bg-[var(--card)] border border-emerald-500 text-emerald-400 rounded-xl px-4 py-3 font-black tracking-[0.2em] text-center outline-none">
+                            <p class="text-[10px] font-bold text-slate-400 mt-2 text-center">OTP is required to save the new password.</p>
+                        </div>
                     </div>
                     <button onclick="saveSettings()" id="btnSaveSet" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest mt-6 shadow-[0_0_15px_rgba(59,130,246,0.4)] active:scale-95 transition-transform">Save Profile Changes</button>
                 </div>
@@ -210,8 +233,14 @@
             else { document.documentElement.classList.add('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; } 
         }
         function toggleTheme() { const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); applyTheme(); } applyTheme();
+        
         window.onload = () => { setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none',600); }, 800); };
         
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('-translate-x-full');
+            document.getElementById('mobileMenuOverlay').classList.toggle('hidden');
+        }
+
         async function init() { 
             renderAuth(); 
             loadNotices(); 
@@ -296,7 +325,7 @@
         }
         function closeGallery() { document.getElementById('imageModal').style.display = 'none'; }
 
-        // 🔥 SECURE PROFILE UPDATE WITH RUBY RED & GOLDEN GLOW BADGES
+        // 🔥 SECURE PROFILE UPDATE WITH RUBY RED GLOW BADGE
         function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; base64Avatar = user.avatar || '';
@@ -304,19 +333,15 @@
             let glowClass = "border-4 border-slate-600 shadow-md";
             let roleBadgeHtml = "";
             
-            // OWNER: RUBY RED GLOW
             if(user.role === 'OWNER') {
                 glowClass = "border-4 border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.9)]";
                 roleBadgeHtml = `<span class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-red-600 to-red-800 text-white font-black px-4 py-1.5 rounded-full text-[10px] shadow-[0_0_15px_rgba(220,38,38,0.8)] border border-red-400 tracking-widest whitespace-nowrap"><i class="fa-solid fa-crown mr-1 text-yellow-300"></i> OWNER</span>`;
-            } 
-            // ADMIN: GOLDEN GLOW
-            else if (user.role === 'ADMIN') {
+            } else if (user.role === 'ADMIN') {
                 glowClass = "border-4 border-yellow-500 shadow-[0_0_40px_rgba(234,179,8,0.8)]";
                 roleBadgeHtml = `<span class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-amber-600 text-black font-black px-4 py-1.5 rounded-full text-[10px] shadow-[0_0_15px_rgba(234,179,8,0.8)] border border-yellow-200 tracking-widest whitespace-nowrap"><i class="fa-solid fa-shield-halved mr-1"></i> ADMIN</span>`;
             }
 
             let avRender = base64Avatar ? `<img src="${base64Avatar}" class="w-24 h-24 rounded-full object-cover ${glowClass}">` : `<div class="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-black bg-[var(--bg)] ${glowClass}">${uName.charAt(0).toUpperCase()}</div>`;
-            
             document.getElementById('pAvatarContainer').innerHTML = `${avRender}${roleBadgeHtml}`;
             document.getElementById('pNameContainer').innerHTML = `${uName}`;
             
@@ -324,48 +349,51 @@
             switchProfTab(defaultTab);
             document.getElementById('setEmail').value = user.email; 
             document.getElementById('settingAvatarPreview').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-2xl font-black text-slate-500">${uName.charAt(0).toUpperCase()}</span>`;
+            
+            // Reset OTP fields
+            document.getElementById('setPass').value = '';
+            document.getElementById('verifyOtp').value = '';
+            document.getElementById('btnSendOtp').classList.add('hidden');
+            document.getElementById('profileOtpArea').classList.add('hidden');
         }
 
         function closeProfile() { document.getElementById('profileModal').style.display = 'none'; }
         
         function switchProfTab(tab) { 
             const allTabs = ['overview', 'orders', 'settings'];
-            document.querySelectorAll('.prof-tab').forEach(b => { 
-                b.classList.remove('active', 'text-blue-500', 'border-blue-500'); 
-                b.classList.add('text-slate-500', 'border-transparent'); 
-            }); 
+            document.querySelectorAll('.prof-tab').forEach(b => { b.classList.remove('active', 'text-blue-500', 'border-blue-500'); b.classList.add('text-slate-500', 'border-transparent'); }); 
             const activeBtn = document.getElementById('tab-'+tab);
-            if(activeBtn) {
-                activeBtn.classList.add('active', 'text-blue-500', 'border-blue-500'); 
-                activeBtn.classList.remove('text-slate-500', 'border-transparent');
-            }
+            if(activeBtn) { activeBtn.classList.add('active', 'text-blue-500', 'border-blue-500'); activeBtn.classList.remove('text-slate-500', 'border-transparent'); }
             allTabs.forEach(t => { document.getElementById('sec-'+t).classList.add('hidden'); }); 
-            const view = document.getElementById('sec-'+tab);
-            if(view) view.classList.remove('hidden'); 
+            const view = document.getElementById('sec-'+tab); if(view) view.classList.remove('hidden'); 
         }
 
+        // 🔥 OTP DIRECT INPUT FIX
         document.getElementById('setPass').addEventListener('input', function(e) {
-            const btn = document.getElementById('btnSendOtp'); const notice = document.getElementById('otpNotice');
-            if(e.target.value.length > 0) { btn.classList.remove('hidden'); notice.classList.remove('hidden'); } 
-            else { btn.classList.add('hidden'); notice.classList.add('hidden'); }
+            const btn = document.getElementById('btnSendOtp'); 
+            if(e.target.value.length > 0) { btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); document.getElementById('profileOtpArea').classList.add('hidden'); }
         });
 
         async function sendProfileOTP() {
-            document.getElementById('btnSendOtp').innerText = 'Sending...';
-            const res = await fetch('/api/auth/send-profile-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id}) });
-            const data = await res.json();
-            if(data.success) { document.getElementById('btnSendOtp').innerText = 'Resend Code'; toast('success', 'OTP Sent to Email'); }
-            else { document.getElementById('btnSendOtp').innerText = 'Failed'; toast('error', 'Error sending email'); }
+            const btn = document.getElementById('btnSendOtp');
+            btn.innerText = 'Sending...';
+            try {
+                const res = await fetch('/api/auth/send-profile-otp', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: user.id}) });
+                const data = await res.json();
+                if(data.success) { 
+                    btn.innerText = 'Code Sent'; 
+                    document.getElementById('profileOtpArea').classList.remove('hidden'); // Show OTP Input
+                    toast('success', 'OTP Sent to Email'); 
+                } else { btn.innerText = 'Failed'; toast('error', 'Error sending email'); }
+            } catch(e) { btn.innerText = 'Error'; }
         }
 
         async function saveSettings() { 
-            const email = document.getElementById('setEmail').value; const password = document.getElementById('setPass').value; 
-            let otp = null;
-            if(password) {
-                const { value: inputOtp } = await Swal.fire({ title: 'Security Verification', html: '<p class="text-sm text-slate-400 mb-4">Check your email for the 6-digit OTP code to change password.</p>', input: 'text', inputPlaceholder: 'Enter 6-digit OTP', confirmButtonText: 'Verify & Save', showCancelButton: true, ...swalDark });
-                if(!inputOtp) return;
-                otp = inputOtp;
-            }
+            const email = document.getElementById('setEmail').value; 
+            const password = document.getElementById('setPass').value; 
+            const otp = document.getElementById('verifyOtp').value;
+            
+            if(password && !otp) return Swal.fire('Error', 'Please enter the OTP sent to your email to save the new password.', 'error', swalDark);
 
             document.getElementById('btnSaveSet').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'; 
             const res = await fetch('/api/user/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({userId: user.id, email, password, avatar: base64Avatar, otp}) }); 
@@ -374,7 +402,6 @@
             
             if(data.success) { 
                 user.email = email; user.avatar = base64Avatar; localStorage.setItem('user', JSON.stringify(user)); 
-                document.getElementById('setPass').value = ''; document.getElementById('btnSendOtp').classList.add('hidden'); document.getElementById('otpNotice').classList.add('hidden');
                 Swal.fire('Saved!', 'Security & Profile settings updated successfully.', 'success', swalDark).then(()=>openProfileDashboard('overview')); renderAuth(); 
             } else { Swal.fire('Error', data.error || 'Update failed', 'error', swalDark); }
         }
@@ -382,6 +409,7 @@
         document.getElementById('fileAvatar').addEventListener('change', function(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); let w = img.width; let h = img.height; if(w>256){h*=256/w; w=256;} canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h); base64Avatar = canvas.toDataURL('image/jpeg', 0.8); document.getElementById('settingAvatarPreview').innerHTML = `<img src="${base64Avatar}" class="w-full h-full object-cover">`; }; img.src = event.target.result; }; reader.readAsDataURL(file); });
         function removeAvatar() { base64Avatar = ''; document.getElementById('settingAvatarPreview').innerHTML = `<span class="text-2xl font-black text-slate-500">${user.firstName.charAt(0).toUpperCase()}</span>`; }
 
+        // LIVE CHAT DEEPSEEK
         function toggleChat() { const cb = document.getElementById('chatWindow'); if (cb.classList.contains('open')) { cb.classList.remove('open'); } else { cb.classList.add('open'); document.getElementById('chatInput').focus(); } }
         async function sendChatMessage() { const inputEl = document.getElementById('chatInput'); const msg = inputEl.value.trim(); if (!msg) return; const mDiv = document.getElementById('chatMessages'); mDiv.innerHTML += `<div class="chat-bubble-user animate-slide-up">${msg}</div>`; inputEl.value = ''; mDiv.scrollTop = mDiv.scrollHeight; const typing = document.createElement('div'); typing.className = 'chat-bubble-ai typing-indicator'; typing.innerHTML = '<span></span><span></span><span></span>'; mDiv.appendChild(typing); mDiv.scrollTop = mDiv.scrollHeight; try { const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) }); const data = await res.json(); mDiv.removeChild(typing); mDiv.innerHTML += `<div class="chat-bubble-ai animate-slide-up">${data.reply.replace(/\n/g, '<br>')}</div>`; mDiv.scrollTop = mDiv.scrollHeight; } catch(e) { mDiv.removeChild(typing); mDiv.innerHTML += `<div class="chat-bubble-ai text-red-500">Error connection.</div>`; } }
 

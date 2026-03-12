@@ -140,9 +140,9 @@
 
         async function login() { const email = document.getElementById('lEmail').value; const password = document.getElementById('lPass').value; if(!email || !password) return; const btn = document.getElementById('btnLogin'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...'; const res = await fetch('/api/rider/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); const data = await res.json(); btn.innerHTML = 'Enter App <i class="fa-solid fa-arrow-right ml-2"></i>'; if(data.success) { rider = { id: data.rider.id }; loadRiderData(); } else { Swal.fire({toast:true, position:'top-end', icon:'error', title: data.error || 'Login Failed', background:'#1e293b', color:'#fff'}); } }
 
-        // 🔥 REAL WITHDRAW LOGIC
+        // 🔥 WITHDRAW LOGIC UPDATED TO 300 LIMIT
         async function requestWithdraw() { 
-            if(rider.walletBalance < 50) return Swal.fire({title: 'Insufficient Balance', text: 'You need at least ৳50 to withdraw.', icon: 'warning', ...swalDark}); 
+            if(rider.walletBalance < 300) return Swal.fire({title: 'Insufficient Balance', text: 'You need at least ৳300 in your wallet to withdraw.', icon: 'warning', ...swalDark}); 
             
             const { value: formValues } = await Swal.fire({
                 title: 'Withdraw Funds',
@@ -153,14 +153,14 @@
                         <option value="nagad">Nagad Personal</option>
                     </select>
                     <input id="wNumber" type="number" class="swal2-input bg-slate-800 text-white border-slate-600 mb-3 font-bold tracking-widest" placeholder="Account Number">
-                    <input id="wAmount" type="number" class="swal2-input bg-slate-800 text-emerald-400 border-slate-600 font-black text-xl" placeholder="Amount (৳)">
+                    <input id="wAmount" type="number" class="swal2-input bg-slate-800 text-emerald-400 border-slate-600 font-black text-xl" placeholder="Amount (Min ৳300)">
                 `,
                 focusConfirm: false, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Send Request', confirmButtonColor: '#10b981', ...swalDark,
                 preConfirm: () => {
                     const method = document.getElementById('wMethod').value;
                     const number = document.getElementById('wNumber').value;
                     const amount = parseFloat(document.getElementById('wAmount').value);
-                    if (!number || !amount || amount < 50 || amount > rider.walletBalance) { Swal.showValidationMessage('Invalid amount or number.'); return false; }
+                    if (!number || !amount || amount < 300 || amount > rider.walletBalance) { Swal.showValidationMessage('Minimum withdrawal is ৳300.'); return false; }
                     return { method, number, amount };
                 }
             });

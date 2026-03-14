@@ -81,6 +81,7 @@
                 
                 <div id="ownerMenu" class="hidden flex-col mt-4 border-t border-slate-800 pt-4">
                     <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest px-4 mb-2">Owner Controls</p>
+                    <button onclick="showTab('promos', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-ticket mr-4 w-5"></i> Promo & Redeem</button>
                     <button onclick="showTab('admins', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-shield-halved mr-4 w-5"></i> Admins</button>
                     <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5"></i> Web Control</button>
                     <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Owner Info</button>
@@ -108,6 +109,20 @@
                 </div>
 
                 <div id="usersTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
+
+                <div id="promosTab" class="tab-content hidden animate-fade">
+                    <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-ticket mr-3"></i>Promo & Redeem Codes</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="glass-panel p-6 rounded-[32px]">
+                            <h3 class="text-xl font-black text-white mb-4">Add Discount Promo</h3>
+                            <input type="text" id="prCode" placeholder="Promo Code (e.g. AURA50)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3">
+                            <input type="number" id="prDisc" placeholder="Discount Percentage (%)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none mb-3">
+                            <button onclick="addPromo()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl">Add & Notify</button>
+                        </div>
+                    </div>
+                    <h2 class="text-xl font-black text-white mb-4">Active Redeem Codes</h2>
+                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Code & Amount</th><th class="p-6">Usage & Expiry</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="redeemListBody" class="divide-y divide-slate-800"></tbody></table></div>
+                </div>
 
                 <div id="adminsTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
@@ -177,7 +192,6 @@
         async function requestAdminOTP() {
             const name = document.getElementById('regName').value; const email = document.getElementById('regEmail').value; const pass = document.getElementById('regPass').value;
             if(!name || !email || !pass) return Swal.fire('Error', 'Fill all fields', 'error', swalDark);
-            
             Swal.fire({title: 'Detecting Location...', didOpen: ()=>Swal.showLoading(), allowOutsideClick: false, ...swalDark});
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -229,7 +243,6 @@
             try { const res = await fetch('/api/store-config'); const data = await res.json();
             document.getElementById('cfgName').value = data.owner.ownerName; document.getElementById('cfgBio').value = data.owner.ownerBio; document.getElementById('cfgPhone').value = data.owner.ownerPhone; document.getElementById('cfgFb').value = data.owner.fbLink; document.getElementById('cfgTg').value = data.owner.tgLink; } catch(e) {}
         }
-
         async function saveStoreConfig() {
             const data = { password: adminPass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
             await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -242,6 +255,14 @@
             if(action === 'add_product') { body.pName = document.getElementById('pName').value; body.pCat = document.getElementById('pCat').value; body.pPrice = document.getElementById('pPrice').value; body.pStock = document.getElementById('pStock').value; body.pImage = document.getElementById('pImage').value; }
             await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
             Swal.fire('Done', 'Action completed', 'success', swalDark); loadAllData();
+        }
+        
+        async function addPromo() {
+            const code = document.getElementById('prCode').value;
+            const discount = document.getElementById('prDisc').value;
+            if(!code || !discount) return toast('warning', 'Fill all fields');
+            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: adminPass, action: 'add_promo', code, discount})});
+            Swal.fire('Added', 'Promo live and users notified.', 'success', swalDark); loadAllData();
         }
 
         async function loadAllData() {
@@ -274,6 +295,7 @@
                 }).join('');
 
                 if(currentRole === 'OWNER') {
+                    document.getElementById('redeemListBody').innerHTML = data.redeemCodes.map(r => `<tr class="table-row-hover"><td class="p-6"><p class="font-black text-emerald-400 text-lg">${r.code}</p><p class="text-xs text-slate-400 font-bold">Amount: ৳${r.amount}</p></td><td class="p-6"><p class="text-sm font-bold text-blue-400">Used: ${r.usedBy.length} / ${r.maxUses}</p><p class="text-[10px] text-slate-500">Exp: ${new Date(r.expiresAt).toLocaleTimeString()}</p></td><td class="p-6 text-right"><button onclick="actionAPI('delete_redeem', ${r.id})" class="text-red-400 bg-red-500/10 p-2 rounded-xl hover:bg-red-600 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
                     document.getElementById('pendingAdminBody').innerHTML = data.pendingAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-blue-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400"><i class="fa-solid fa-location-dot"></i> ${a.location || 'N/A'}</td><td class="p-6 text-right"><button onclick="adminAction('approve_admin', ${a.id})" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded mr-2 font-bold text-xs hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="adminAction('reject_admin', ${a.id})" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button></td></tr>`).join('') || `<tr><td colspan="3" class="p-6 text-center text-slate-500">No pending requests.</td></tr>`;
                     document.getElementById('activeAdminBody').innerHTML = data.activeAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-slate-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400">${a.location || 'Owner Panel Access'}</td><td class="p-6 text-right">${a.role !== 'OWNER' ? `<button onclick="adminAction('delete_admin', ${a.id})" class="bg-red-500/10 text-red-400 p-2 rounded hover:bg-red-500 hover:text-white transition-colors" title="Revoke Role"><i class="fa-solid fa-trash"></i></button>`: '<span class="text-xs font-bold text-yellow-500">OWNER</span>'}</td></tr>`).join('');
                 }

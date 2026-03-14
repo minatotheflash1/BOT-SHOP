@@ -56,7 +56,7 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
     }
 );
 
-// 🔥 2. AUTO LINK SCRAPER (CLOUDFLARE BYPASS INCLUDED)
+// 🔥 2. AUTO LINK SCRAPER (WITH MANUAL PRICE, SIZE & STOCK)
 const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
     async (ctx) => {
         ctx.reply('🔗 *Send the Product Link (URL):*\n\n_(The bot will auto-bypass security to fetch Title, Description, and Photo)_', {parse_mode: 'Markdown'});
@@ -71,7 +71,7 @@ const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
         ctx.reply('⏳ Bypassing security & fetching data...');
         
         try {
-            // Using Microlink API to bypass Cloudflare "Just a moment..."
+            // Using Microlink API to bypass Cloudflare
             const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}`;
             const response = await fetch(apiUrl);
             const data = await response.json();
@@ -106,7 +106,6 @@ const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
             ctx.wizard.state.abilities = desc;
             ctx.wizard.state.imageIds = img ? [img] : [];
             ctx.wizard.state.category = "Premium"; 
-            ctx.wizard.state.stock = 100; 
             
             ctx.reply(`✅ *Scraped Successfully!*\n\n📦 *Title:* ${title}\n\n💵 Now, reply with the *Price in BDT (৳)*:`, {parse_mode: 'Markdown'});
             return ctx.wizard.next();
@@ -115,26 +114,41 @@ const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
             return ctx.scene.leave();
         }
     },
+    // Step 3: Receive Price and Ask for Size
     async (ctx) => {
         const price = parseFloat(ctx.message.text);
         if(isNaN(price)) {
             ctx.reply('❌ Invalid price. Cancelled.');
             return ctx.scene.leave();
         }
+        ctx.wizard.state.price = price;
+        ctx.reply('📏 *Send Sizes (comma separated, e.g. M, L, XL) or type "none":*', {parse_mode: 'Markdown'});
+        return ctx.wizard.next();
+    },
+    // Step 4: Receive Size and Ask for Stock
+    async (ctx) => {
+        const sizeInput = ctx.message.text;
+        ctx.wizard.state.sizes = sizeInput.toLowerCase() === 'none' ? [] : sizeInput.split(',').map(s => s.trim());
+        ctx.reply('📦 *Send Stock Quantity (e.g. 50):*', {parse_mode: 'Markdown'});
+        return ctx.wizard.next();
+    },
+    // Step 5: Receive Stock and Save to Database
+    async (ctx) => {
+        const stock = parseInt(ctx.message.text) || 1;
         try {
             await prisma.product.create({
                 data: {
                     name: ctx.wizard.state.name,
                     category: ctx.wizard.state.category,
-                    price: price,
+                    price: ctx.wizard.state.price,
                     abilities: ctx.wizard.state.abilities,
-                    stock: ctx.wizard.state.stock,
-                    sizes: [],
-                    colors: [],
+                    stock: stock,
+                    sizes: ctx.wizard.state.sizes,
+                    colors: [], 
                     imageIds: ctx.wizard.state.imageIds
                 }
             });
-            ctx.reply('🎉 *Product added successfully to your store!*', {parse_mode: 'Markdown'});
+            ctx.reply(`🎉 *Product added successfully to your store!*\n\n💰 Price: ৳${ctx.wizard.state.price}\n📏 Sizes: ${ctx.wizard.state.sizes.length > 0 ? ctx.wizard.state.sizes.join(', ') : 'None'}\n📦 Stock: ${stock}`, {parse_mode: 'Markdown'});
         } catch(e) {
             ctx.reply('❌ Database Error.');
         }

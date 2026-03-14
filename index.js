@@ -56,38 +56,62 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
     }
 );
 
-// 🔥 2. NEW: AUTO PRODUCT ADD (SCRAPER)
+// 🔥 2. AUTO LINK SCRAPER (CLOUDFLARE BYPASS INCLUDED)
 const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
     async (ctx) => {
-        ctx.reply('🔗 *Send the Product Link (URL):*\n\n_(The bot will automatically fetch the Title, Description, and Photo)_', {parse_mode: 'Markdown'});
+        ctx.reply('🔗 *Send the Product Link (URL):*\n\n_(The bot will auto-bypass security to fetch Title, Description, and Photo)_', {parse_mode: 'Markdown'});
         return ctx.wizard.next();
     },
     async (ctx) => {
         const url = ctx.message.text;
         if(!url || !url.startsWith('http')) {
-            ctx.reply('❌ Invalid URL. Must start with http or https. Try again later.');
+            ctx.reply('❌ Invalid URL. Must start with http or https.');
             return ctx.scene.leave();
         }
-        ctx.reply('⏳ Fetching data from the link...');
+        ctx.reply('⏳ Bypassing security & fetching data...');
+        
         try {
-            // Basic Scraper Logic
-            const response = await fetch(url);
-            const html = await response.text();
+            // Using Microlink API to bypass Cloudflare "Just a moment..."
+            const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
             
-            const titleMatch = html.match(/<meta[^>]+(?:property|name)="og:title"[^>]+content="([^">]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
-            const imgMatch = html.match(/<meta[^>]+(?:property|name)="og:image"[^>]+content="([^">]+)"/i);
-            const descMatch = html.match(/<meta[^>]+(?:property|name)="og:description"[^>]+content="([^">]+)"/i);
+            let title = "Imported Product";
+            let desc = "Premium quality product imported via link.";
+            let img = null;
+
+            if (data.status === 'success' && data.data) {
+                title = data.data.title || title;
+                desc = data.data.description ? data.data.description.substring(0, 250) + '...' : desc;
+                img = data.data.image ? data.data.image.url : null;
+            } else {
+                // Fallback Fetch
+                const fallback = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }});
+                const html = await fallback.text();
+                const titleMatch = html.match(/<meta[^>]+(?:property|name)="og:title"[^>]+content="([^">]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
+                const imgMatch = html.match(/<meta[^>]+(?:property|name)="og:image"[^>]+content="([^">]+)"/i);
+                const descMatch = html.match(/<meta[^>]+(?:property|name)="og:description"[^>]+content="([^">]+)"/i);
+                
+                if(titleMatch && !titleMatch[1].includes('Just a moment')) title = titleMatch[1];
+                if(descMatch) desc = descMatch[1].substring(0, 250) + '...';
+                if(imgMatch) img = imgMatch[1];
+            }
+
+            // Filtering out cloudflare fake titles
+            if(title.includes("Just a moment") || title.includes("Cloudflare")) {
+                title = "Awesome Product (Title hidden by security)";
+            }
+
+            ctx.wizard.state.name = title;
+            ctx.wizard.state.abilities = desc;
+            ctx.wizard.state.imageIds = img ? [img] : [];
+            ctx.wizard.state.category = "Premium"; 
+            ctx.wizard.state.stock = 100; 
             
-            ctx.wizard.state.name = titleMatch ? titleMatch[1] : "Imported Product";
-            ctx.wizard.state.abilities = descMatch ? descMatch[1].substring(0, 250) + '...' : "Premium quality product imported via link.";
-            ctx.wizard.state.imageIds = imgMatch ? [imgMatch[1]] : [];
-            ctx.wizard.state.category = "Premium"; // Default
-            ctx.wizard.state.stock = 100; // Default
-            
-            ctx.reply(`✅ *Scraped Successfully!*\n\n📦 *Title:* ${ctx.wizard.state.name}\n\n💵 Now, reply with the *Price in BDT (৳)*:`, {parse_mode: 'Markdown'});
+            ctx.reply(`✅ *Scraped Successfully!*\n\n📦 *Title:* ${title}\n\n💵 Now, reply with the *Price in BDT (৳)*:`, {parse_mode: 'Markdown'});
             return ctx.wizard.next();
         } catch(e) {
-            ctx.reply('❌ Failed to fetch link. The website might be protected. Try manual add instead.');
+            ctx.reply('❌ Website strongly protected. Could not fetch data.');
             return ctx.scene.leave();
         }
     },
@@ -121,7 +145,6 @@ const addLinkWizard = new Scenes.WizardScene('ADD_LINK_SCENE',
 const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE', (ctx) => { ctx.reply('📢 *Type Notice:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, async (ctx) => { if(ctx.message.text) { await prisma.notice.create({ data: { text: ctx.message.text } }); ctx.reply('✅ *Notice live.*', { parse_mode: 'Markdown' }); } return ctx.scene.leave(); });
 const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); await prisma.notice.create({ data: { text: `⚡ MEGA FLASH SALE IS LIVE! Get ${discount}% OFF for the next ${ctx.wizard.state.hours} hours!` } }); ctx.reply(`✅ *FLASH SALE ACTIVATED & NOTICE PUBLISHED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); });
 
-// Registering New Scene
 const stage = new Scenes.Stage([addProductWizard, addLinkWizard, addNoticeWizard, flashSaleWizard]); 
 mainBot.use(session()); mainBot.use(stage.middleware());
 
@@ -141,13 +164,13 @@ mainBot.start((ctx) => {
 });
 
 mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
-mainBot.action('menu_add_link', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_LINK_SCENE'); }); // New Button Action
+mainBot.action('menu_add_link', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_LINK_SCENE'); }); // 🔥 New Trigger
 mainBot.action('menu_add_notice', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_NOTICE_SCENE'); });
 mainBot.action('menu_clear_notices', async (ctx) => { await prisma.notice.deleteMany({}); ctx.answerCbQuery('Notices Cleared!'); ctx.reply('✅ Notices cleared.'); });
 mainBot.action('menu_flash_sale', async (ctx) => { let fs = await prisma.flashSale.findFirst(); if(fs && fs.isActive) { await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: false } }); ctx.answerCbQuery('Flash Sale Stopped!'); ctx.reply('🛑 Flash Sale OFF.'); } else { ctx.answerCbQuery(); ctx.scene.enter('FLASH_SALE_SCENE'); } });
 mainBot.action('toggle_maintenance', async (ctx) => { isMaintenance = !isMaintenance; ctx.answerCbQuery(`Maintenance ${isMaintenance ? 'ON' : 'OFF'}`); ctx.reply(`Maintenance mode is now ${isMaintenance ? 'ON' : 'OFF'}`);});
 
-// Redeem Generator
+// TG GENCODE FOR OWNER ONLY
 mainBot.command('gencode', async (ctx) => {
     if(ctx.from.id.toString() !== ADMIN_ID) return ctx.reply('❌ Unauthorized Access.');
     const args = ctx.message.text.split(' ');
@@ -183,8 +206,8 @@ logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]);
 // ================= PUBLIC EXPRESS APIs =================
 app.get('/api/notices', async (req, res) => { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); const notices = await prisma.notice.findMany({ where: { isActive: true } }); res.json(notices); });
 app.get('/api/products', async (req, res) => { const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json(products); }); 
+
 app.get('/api/photo/:fileId', async (req, res) => { 
-    // Direct link bypass logic is handled in frontend now, but keeping backend safe.
     try { const link = await mainBot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } 
 });
 
@@ -350,14 +373,6 @@ app.post('/api/auth/send-otp', async (req, res) => {
 app.post('/api/auth/reset', async (req, res) => { const { email, code, token, newPassword } = req.body; let user; if (token) user = await prisma.user.findFirst({ where: { resetToken: token } }); else user = await prisma.user.findFirst({ where: { email: email, resetCode: code } }); if (!user || !user.resetExpiry || user.resetExpiry < new Date()) return res.json({ success: false, error: 'Invalid or expired code/token.' }); await prisma.user.update({ where: { id: user.id }, data: { password: newPassword, resetCode: null, resetToken: null, resetExpiry: null } }); res.json({ success: true }); });
 app.post('/api/user/update', async (req, res) => { const { userId, email, password, avatar, otp } = req.body; try { const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); const data = {}; if (email) data.email = email; if (avatar !== undefined) data.avatar = avatar; if (password) { if (!otp || user.resetCode !== otp || (user.resetExpiry && user.resetExpiry < new Date())) return res.json({ success: false, error: 'Invalid or expired OTP.' }); data.password = password; data.resetCode = null; data.resetExpiry = null; } await prisma.user.update({ where: { id: parseInt(userId) }, data }); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'Update failed.' }); } });
 app.post('/api/checkout', async (req, res) => { const { userId, cartItems, address, promoCode } = req.body; try { const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(user.isBanned) return res.status(403).json({ success: false, error: 'Account Banned!' }); const ADVANCE_FEE = 200; if(user.balanceBdt < ADVANCE_FEE) return res.json({ success: false, error: 'Insufficient Balance! You need at least ৳200 advance booking money.' }); let promoDiscount = 0; if (promoCode) { const prm = await prisma.promo.findUnique({where: {code: promoCode}}); if (prm && prm.isActive) promoDiscount = prm.discount; } let total = 0; let itemsToBuy = []; let receiptItemsHtml = ''; for (let item of cartItems) { const prod = await prisma.product.findUnique({ where: { id: parseInt(item.id) } }); if(!prod || prod.stock <= 0) continue; let itemFinalPrice = item.price - (item.price * promoDiscount / 100); total += itemFinalPrice; itemsToBuy.push({ prod, size: item.size, color: item.color, finalPrice: itemFinalPrice }); let varTxt = []; if(item.size) varTxt.push(item.size); if(item.color) varTxt.push(item.color); receiptItemsHtml += `<p style="margin: 5px 0; color: #cbd5e1;">• ${prod.name} ${varTxt.length>0 ? `[${varTxt.join(', ')}]` : ''} - <b>৳${itemFinalPrice}</b></p>`; } if(itemsToBuy.length === 0) return res.json({ success: false, error: 'Items out of stock.' }); let actualAdvance = Math.min(ADVANCE_FEE, total); let totalDue = total - actualAdvance; const pointsEarned = Math.floor(total / 100); await prisma.user.update({ where: { id: user.id }, data: { balanceBdt: { decrement: actualAdvance }, loyaltyPoints: { increment: pointsEarned }, savedAddress: JSON.stringify(address) } }); let adminOrderMsg = `📦 *NEW ORDER RECEIVED*\n\n👤 *Customer:* ${user.firstName}\n📞 *Phone:* ${address.phone}\n🏠 *Address:* ${address.street}, ${address.city}\n\n🛒 *Total:* ৳${total}\n✅ *Advance Paid:* ৳${actualAdvance}\n🚚 *Due (COD):* ৳${totalDue}`; let purchaseRecords = []; for (let itm of itemsToBuy) { let itemAdvance = actualAdvance / itemsToBuy.length; let itemDue = totalDue / itemsToBuy.length; let p = await prisma.purchase.create({ data: { userId: user.id, productId: itm.prod.id, selectedSize: itm.size, selectedColor: itm.color, priceTotal: itm.finalPrice, advancePaid: itemAdvance, dueCod: itemDue, promoApplied: promoCode, phone: address.phone, street: address.street, city: address.city, postcode: address.postcode, status: 'PENDING' } }); purchaseRecords.push(p.id); await prisma.product.update({ where: { id: itm.prod.id }, data: { stock: { decrement: 1 } } }); } if(ADMIN_ID) { logBot.telegram.sendMessage(ADMIN_ID, adminOrderMsg, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '📥 Receive Order', callback_data: `receive_${purchaseRecords[0]}` }], [{ text: '🚚 Mark Shipped', callback_data: `ship_${purchaseRecords[0]}` }] ] } }).catch(e=>{}); } const qrData = encodeURIComponent(`AURA STORE RECEIPT\nOrder ID: #${purchaseRecords[0]}\nTotal: BDT ${total}\nAdvance: BDT ${actualAdvance}\nDue(COD): BDT ${totalDue}\nStatus: Pending`); const qrHtml = `<div style="text-align: center; margin: 30px 0;"><p style="color: #94a3b8; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Scan Receipt QR</p><div style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrData}" width="120" height="120" alt="QR Code"></div></div>`; const receiptMail = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: user.email, subject: 'Order Confirmed - Your Receipt', html: `${emailHeader}<h2 style="color: #10b981; margin-bottom: 5px;">Order Confirmed! 🎉</h2><p style="color: #94a3b8; font-size: 14px;">Thank you for shopping with AURA STORE. Your order is now pending for review.</p><div style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 25px 0;"><h3 style="color: #ffffff; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Order Details</h3>${receiptItemsHtml}<div style="margin-top: 15px; border-top: 1px dashed #334155; padding-top: 15px;"><p style="margin: 5px 0; color: #e2e8f0;"><strong>Total Price:</strong> ৳${total}</p><p style="margin: 5px 0; color: #34d399;"><strong>Advance Paid:</strong> ৳${actualAdvance}</p><p style="margin: 5px 0; color: #ef4444; font-size: 18px;"><strong>Due on Delivery (COD):</strong> ৳${totalDue}</p></div></div><div style="background-color: #0f172a; padding: 15px; border-radius: 8px;"><p style="margin: 0; color: #94a3b8; font-size: 12px;"><strong>Delivery Address:</strong><br>${address.street}, ${address.city} - ${address.postcode}<br>Phone: ${address.phone}</p></div>${qrHtml}${emailFooter}` }; if(process.env.EMAIL_USER && process.env.EMAIL_PASS) transporter.sendMail(receiptMail).catch(e=>{}); res.json({ success: true, newBalance: user.balanceBdt - actualAdvance, advance: actualAdvance, due: totalDue }); } catch(e) { res.status(500).json({ success: false, error: 'Server Error' }); } });
-
-app.get('/api/user/:id', async (req, res) => { const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } }); if(user) res.json({ success: true, balanceBdt: user.balanceBdt, refCode: user.refCode, role: user.role, avatar: user.avatar, refCount: user.refCount, loyaltyPoints: user.loyaltyPoints, savedAddress: user.savedAddress }); else res.json({ success: false }); });
-app.get('/api/library/:userId', async (req, res) => { res.json(await prisma.purchase.findMany({ where: { userId: parseInt(req.params.userId) }, include: { product: true }, orderBy: { createdAt: 'desc' } })); });
-app.get('/api/history/:userId', async (req, res) => { res.json(await prisma.deposit.findMany({ where: { userId: parseInt(req.params.userId) }, orderBy: { createdAt: 'desc' } })); });
-app.post('/api/deposit', async (req, res) => { const { userId, method, amountBdt, senderNumber, trxId } = req.body; try { const dep = await prisma.deposit.create({ data: { userId: parseInt(userId), method, amountBdt: parseFloat(amountBdt), senderNumber, trxId } }); const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } }); if(ADMIN_ID) logBot.telegram.sendMessage(ADMIN_ID, `💰 *FUND REQUEST*\n\n👤 User: ${user.firstName}\n💵 Amount: ৳${amountBdt}\n💳 Gateway: ${method.toUpperCase()}\n📱 Sender: ${senderNumber}\n🔢 TrxID: \`${trxId}\``, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '✅ Approve', callback_data: `approve_${dep.id}` }, { text: '❌ Reject', callback_data: `reject_${dep.id}` }]] } }).catch(e=>{}); res.json({ success: true }); } catch(e) { res.json({ success: false, error: 'TrxID already exists' }); } });
-app.post('/api/register', async (req, res) => { try { const { name, email, password } = req.body; await prisma.user.create({ data: { firstName: name, email, password, refCode: generateRefCode(), isVerified: true } }); res.json({ success: true, message: 'Account created!' }); } catch(e) { res.status(400).json({ success: false, error: 'Email exists.' }); } });
-app.post('/api/login', async (req, res) => { try { const user = await prisma.user.findUnique({ where: { email: req.body.email } }); if (user && user.password === req.body.password) { if(user.isBanned) return res.status(403).json({ success: false, error: 'Account Banned' }); res.json({ success: true, user: { id: user.id, name: user.firstName, email: user.email, balanceBdt: user.balanceBdt, role: user.role, avatar: user.avatar, loyaltyPoints: user.loyaltyPoints } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });
-app.post('/api/feedback', async (req, res) => { try { const { userId, subject, message } = req.body; const u = await prisma.user.findUnique({where:{id:parseInt(userId)}}); if (!u) return res.json({ success: false }); if (ADMIN_ID) { feedbackBot.telegram.sendMessage(ADMIN_ID, `📢 *NEW FEEDBACK*\n\n👤 User: ${u.firstName}\n📧 Email: ${u.email}\n📌 Subject: ${subject}\n📝 Message:\n${message}`, { parse_mode: 'Markdown' }).catch(()=>{}); } if (process.env.EMAIL_USER && process.env.EMAIL_PASS) { const mailOptions = { from: `"AURA STORE" <${process.env.EMAIL_USER}>`, to: OWNER_EMAIL, subject: `New Feedback: ${subject}`, html: `${emailHeader}<h2 style="color: #facc15;">New Customer Feedback</h2><p style="color:#94a3b8;"><strong>From:</strong> ${u.firstName} (${u.email})</p><div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px dashed #3b82f6; margin-top: 20px;"><p style="color: #ffffff; margin: 0; line-height: 1.6;">${message}</p></div>${emailFooter}` }; await transporter.sendMail(mailOptions); } res.json({ success: true }); } catch(e){ res.json({ success: false, error: 'Server error' }); } });
 
 // Rider APIs
 app.post('/api/rider/login', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { email: req.body.email } }); if (rider && rider.password === req.body.password) { res.json({ success: true, rider: { id: rider.id } }); } else { res.status(401).json({ success: false, error: 'Invalid credentials' }); } } catch(e) { res.status(500).json({ success: false }); } });

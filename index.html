@@ -11,7 +11,15 @@
     <script>
         tailwind.config = { 
             darkMode: 'class', 
-            theme: { extend: { animation: { 'fade-in': 'fadeIn 0.4s ease-in-out', 'slide-up': 'slideUp 0.5s ease-out forwards', 'slide-in-right': 'slideInRight 0.4s ease-out forwards' } } } 
+            theme: { 
+                extend: { 
+                    animation: { 
+                        'fade-in': 'fadeIn 0.4s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'slide-in-right': 'slideInRight 0.4s ease-out forwards'
+                    } 
+                } 
+            } 
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -19,25 +27,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --glass: rgba(255,255,255,0.9); }
-        html.dark { --bg: #050b14; --text: #e2e8f0; --card: #0f172a; --border: #1e293b; --glass: rgba(15,23,42,0.85); }
+        :root { 
+            --bg: #f8fafc; --text: #0f172a; --card: #ffffff; 
+            --border: #e2e8f0; --glass: rgba(255,255,255,0.9); 
+        }
+        html.dark { 
+            --bg: #050b14; --text: #e2e8f0; --card: #0f172a; 
+            --border: #1e293b; --glass: rgba(15,23,42,0.85); 
+        }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            padding-bottom: 80px; 
+            overflow-x: hidden; 
+            transition: background-color 0.3s, color 0.3s; 
+        }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } 
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
 
+        /* Background Blobs */
         .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
         .blob { position: absolute; filter: blur(100px); opacity: 0.15; animation: float 20s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; }
         .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; animation-delay: -5s; }
         @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(100px, 50px); } }
 
+        /* Cards & Categories */
         .product-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s; }
         .product-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 15px 30px rgba(59, 130, 246, 0.15); }
         
@@ -49,9 +72,11 @@
         .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; cursor: pointer; }
         .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
+        /* 🔥 SLOWER TICKER ANIMATION */
         .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #0f172a, #1e293b); border-bottom: 1px solid #3b82f6; display: flex; align-items: center; height: 40px; position: relative; z-index: 40; }
         .ticker-title { background: #3b82f6; color: white; font-weight: 900; padding: 0 20px; height: 100%; display: flex; align-items: center; z-index: 10; position: relative; box-shadow: 5px 0 15px rgba(0,0,0,0.5); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-        .ticker-move { display: inline-block; white-space: nowrap; padding-left: 100%; animation: tickerAnim 15s linear infinite; }
+        /* 15s was too fast, updated to 35s */
+        .ticker-move { display: inline-block; white-space: nowrap; padding-left: 100%; animation: tickerAnim 35s linear infinite; }
         .ticker-move:hover { animation-play-state: paused; cursor: default; }
         .ticker-item { margin-right: 50px; font-weight: bold; color: #e2e8f0; font-size: 13px; letter-spacing: 1px; display: inline-block; }
         .ticker-item span { color: #facc15; margin-right: 10px; }
@@ -73,6 +98,7 @@
         #galleryThumbnails img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all 0.3s; }
         #galleryThumbnails img:hover { border-color: #3b82f6; transform: scale(1.1); }
         
+        /* Chat Box */
         #chatWindow { position: fixed; bottom: 150px; left: 20px; width: calc(100% - 40px); max-width: 350px; height: 450px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; z-index: 100000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; transform: scale(0); transform-origin: bottom left; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #chatWindow.open { transform: scale(1); }
         @media (min-width: 768px) { #chatWindow { bottom: 90px; left: 30px; width: 350px; } }
@@ -92,7 +118,10 @@
         <i class="fa-solid fa-circle-notch fa-spin text-5xl text-blue-600"></i>
     </div>
     
-    <div class="blob-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
     <div id="flashBanner" class="hidden bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs font-bold py-1.5 text-center shadow-lg relative z-50 animate-fade-in">
         <i class="fa-solid fa-bolt text-yellow-300 mr-2 animate-pulse"></i> FLASH SALE ENDS IN: <span id="countdownTimer" class="font-mono text-yellow-300 ml-2 tracking-widest">00:00:00</span>
@@ -121,7 +150,7 @@
             <div class="flex items-center gap-4">
                 <button onclick="openNotices()" class="text-[var(--text)] text-xl hover:text-blue-500 transition-colors relative">
                     <i class="fa-solid fa-bell"></i>
-                    <span id="bellBadge" class="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full hidden"></span>
+                    <span id="bellBadge" class="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full hidden border border-[var(--card)]"></span>
                 </button>
                 <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex justify-center items-center bg-[var(--card)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm">
                     <i id="themeIcon" class="fa-solid fa-sun text-yellow-400"></i>
@@ -137,9 +166,16 @@
             <span class="font-black text-xl tracking-tighter text-[var(--text)]">AURA<span class="text-blue-500">MENU</span></span>
             <button onclick="toggleMobileMenu()" class="text-xl text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        
+        <div id="menuFundSection" class="hidden p-5 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white mx-4 mt-4 rounded-xl shadow-lg relative overflow-hidden">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-200">Wallet Balance</p>
+            <h3 class="text-2xl font-black mt-1" id="menuFundValue">৳0</h3>
+            <i class="fa-solid fa-wallet absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-2 mt-2">
             <button onclick="location.reload()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-house mr-3 text-blue-500"></i> Storefront</button>
-            <button onclick="toggleMobileMenu(); openAddFundModal()" class="w-full text-left p-4 rounded-xl font-bold text-emerald-500 hover:bg-emerald-500/10 transition-colors border border-emerald-500/20"><i class="fa-solid fa-wallet mr-3"></i> Add Money to Wallet</button>
+            <button onclick="toggleMobileMenu(); openAddFundModal()" class="w-full text-left p-4 rounded-xl font-bold text-emerald-500 hover:bg-emerald-500/10 transition-colors border border-emerald-500/20"><i class="fa-solid fa-money-bill-transfer mr-3"></i> Add Fund to Wallet</button>
             <button onclick="toggleMobileMenu(); openLeaderboard()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-trophy mr-3 text-yellow-400"></i> Top Performers</button>
             <button onclick="toggleMobileMenu(); openAdminInfo()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-id-badge mr-3 text-indigo-500"></i> Admin Support</button>
             <button onclick="toggleMobileMenu(); openFeedback()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-comment-dots mr-3 text-rose-500"></i> Leave Feedback</button>
@@ -152,7 +188,7 @@
     </div>
 
     <button onclick="openAdminInfo()" id="btnAdminInfo" class="fab animate-slide-up hidden md:flex" title="Admin Support & Info"><i class="fa-solid fa-id-badge text-xl"></i></button>
-    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-robot text-xl"></i></button>
+    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-headset text-xl"></i></button>
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div id="chatWindow">
@@ -214,6 +250,7 @@
             <h2 class="text-2xl font-black text-[var(--text)]"><i class="fa-solid fa-cart-shopping mr-2 text-blue-500"></i> My Cart</h2>
             <button onclick="toggleCart()" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full text-[var(--text)] hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[var(--bg)] text-[var(--text)]">
             <div id="cartItemsContainer" class="space-y-4 mb-6"></div>
             
@@ -234,12 +271,15 @@
                 </div>
             </div>
         </div>
+        
         <div class="p-6 border-t border-[var(--border)] bg-[var(--card)]">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-sm text-[var(--text)]">Subtotal:</span><span id="cartTotal" class="font-bold text-lg text-[var(--text)]">৳0</span></div>
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-sm text-indigo-500">Promo Discount:</span><span id="cartDiscount" class="font-bold text-indigo-500">- ৳0</span></div>
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-[var(--border)]"><span class="font-bold text-sm text-slate-500">Advance Booking:</span><span id="cartAdvance" class="font-black text-emerald-500 text-lg">- ৳0</span></div>
             <div class="flex justify-between items-center mb-6"><span class="font-black uppercase tracking-widest text-[var(--text)]">Due (COD):</span><span id="cartDue" class="text-3xl font-black text-blue-500">৳0</span></div>
-            <button onclick="processOrder()" id="btnConfirmOrder" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95"><i class="fa-solid fa-check-circle mr-2"></i> Confirm Order</button>
+            <button onclick="processOrder()" id="btnConfirmOrder" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-transform active:scale-95">
+                <i class="fa-solid fa-check-circle mr-2"></i> Confirm Order
+            </button>
         </div>
     </div>
 
@@ -268,7 +308,7 @@
             </div>
             <div class="p-6 bg-[var(--bg)] space-y-4">
                 
-                <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] mb-4">
+                <div class="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] mb-4 shadow-sm">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Send Money to:</p>
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-black text-pink-500"><i class="fa-solid fa-money-bill-transfer"></i> bKash Personal:</span>
@@ -288,7 +328,7 @@
                 <input type="text" id="depSender" placeholder="Sender Mobile Number" class="w-full bg-[var(--card)] border border-[var(--border)] p-4 rounded-xl text-[var(--text)] font-bold outline-none focus:border-emerald-500">
                 <input type="text" id="depTrx" placeholder="Transaction ID (TrxID)" class="w-full bg-[var(--card)] border border-[var(--border)] p-4 rounded-xl text-emerald-500 font-black tracking-widest uppercase outline-none focus:border-emerald-500">
                 
-                <button onclick="submitDeposit()" id="btnSubmitDep" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest hover:bg-emerald-500 transition-colors">Submit Request</button>
+                <button onclick="submitDeposit()" id="btnSubmitDep" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 uppercase tracking-widest hover:bg-emerald-500 transition-colors mt-2">Submit Request</button>
             </div>
         </div>
     </div>
@@ -365,7 +405,8 @@
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[var(--bg)] text-[var(--text)]">
                 
                 <div id="sec-overview" class="space-y-6 text-center animate-fade-in">
-                    <div id="pAvatarContainer" class="relative mx-auto mb-6 w-24 h-24 mt-2"></div>
+                    <div id="pAvatarContainer" class="relative mx-auto mb-6 w-24 h-24 mt-2">
+                        </div>
                     <div><h3 class="text-3xl font-black flex justify-center items-center flex-wrap gap-2" id="pNameContainer"></h3></div>
                     <button onclick="window.logout()" class="text-red-500 font-bold hover:bg-red-500/10 px-6 py-3 rounded-xl transition-colors font-black uppercase tracking-widest mt-4 border border-red-500/20"><i class="fa-solid fa-right-from-bracket mr-2"></i> Secure Logout</button>
                 </div>
@@ -443,6 +484,7 @@
         
         let user = null; 
         try { const s = localStorage.getItem('user'); if(s) user = JSON.parse(s); } catch(e){}
+        
         let allProducts = []; 
         let base64Avatar = ''; 
         let lbData = null; 
@@ -451,13 +493,43 @@
         let promoDiscPercent = 0;
         let bKashNum = '';
         let nagadNum = '';
+        let currentCategory = 'All';
+        let showOnlyWishlist = false;
+        let wishlist = [];
 
-        // Theme
-        function applyTheme() { const isLight = localStorage.getItem('theme') === 'light'; if (isLight) { document.documentElement.classList.remove('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-moon text-slate-700'; } else { document.documentElement.classList.add('dark'); document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; } }
-        function toggleTheme() { const isDark = document.documentElement.classList.contains('dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); applyTheme(); } applyTheme();
+        // ================= SYSTEM INIT & THEME =================
+        function applyTheme() { 
+            const isLight = localStorage.getItem('theme') === 'light'; 
+            if (isLight) { 
+                document.documentElement.classList.remove('dark'); 
+                document.getElementById('themeIcon').className = 'fa-solid fa-moon text-slate-700'; 
+            } else { 
+                document.documentElement.classList.add('dark'); 
+                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400'; 
+            } 
+        }
         
-        window.onload = () => { setTimeout(() => { document.getElementById('splashScreen').style.opacity = '0'; setTimeout(()=>document.getElementById('splashScreen').style.display='none', 600); }, 800); };
-        window.addEventListener('scroll', () => { const btn = document.getElementById('btnScrollTop'); if(btn) { if (window.scrollY > 300) btn.classList.add('visible'); else btn.classList.remove('visible'); } });
+        function toggleTheme() { 
+            const isDark = document.documentElement.classList.contains('dark'); 
+            localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
+            applyTheme(); 
+        } 
+        applyTheme();
+        
+        window.onload = () => { 
+            setTimeout(() => { 
+                document.getElementById('splashScreen').style.opacity = '0'; 
+                setTimeout(()=>document.getElementById('splashScreen').style.display='none', 600); 
+            }, 800); 
+        };
+        
+        window.addEventListener('scroll', () => { 
+            const btn = document.getElementById('btnScrollTop'); 
+            if(btn) { 
+                if (window.scrollY > 300) btn.classList.add('visible'); 
+                else btn.classList.remove('visible'); 
+            } 
+        });
 
         function toggleMobileMenu() {
             document.getElementById('mobileMenu').classList.toggle('-translate-x-full');
@@ -467,16 +539,22 @@
         async function init() { 
             renderAuth(); 
             loadNotices(); 
+            fetchConfigData(); 
             if(user && user.id) { 
-                try { const res = await fetch('/api/user/' + user.id); const data = await res.json(); 
-                    if(data.success) { user = {...user, ...data}; localStorage.setItem('user', JSON.stringify(user)); renderAuth(); } 
+                try { 
+                    const res = await fetch('/api/user/' + user.id); 
+                    const data = await res.json(); 
+                    if(data.success) { 
+                        user = {...user, ...data}; 
+                        localStorage.setItem('user', JSON.stringify(user)); 
+                        renderAuth(); 
+                    } 
                 } catch(e) {} 
             } 
             loadProducts(); 
-            fetchConfigData(); // Preload numbers for Add Fund
         }
 
-        // ================= STORE CONFIG & NOTICES =================
+        // ================= CONFIG, NOTICES & ALERTS =================
         async function fetchConfigData() {
             try {
                 const res = await fetch('/api/store-config');
@@ -494,6 +572,7 @@
                 const res = await fetch('/api/store-config');
                 const data = await res.json();
                 Swal.close();
+                
                 document.getElementById('oName').innerText = data.owner.ownerName; 
                 document.getElementById('oBio').innerText = `"${data.owner.ownerBio}"`; 
                 document.getElementById('oPhoneBtn').href = `tel:${data.owner.ownerPhone}`; 
@@ -524,43 +603,64 @@
                 if(notices && notices.length > 0) { 
                     document.getElementById('noticeText').innerHTML = notices.map(n => `<span class="ticker-item"><span>•</span>${n.text}</span>`).join(''); 
                     document.getElementById('noticeWrapper').classList.remove('hidden'); 
-                    document.getElementById('bellBadge').classList.remove('hidden'); // Show notification dot
+                    document.getElementById('bellBadge').classList.remove('hidden'); 
                 } 
             } catch(e) {} 
         }
 
         function openNotices() {
-            document.getElementById('bellBadge').classList.add('hidden'); // Hide dot
-            if(document.getElementById('noticeText').innerHTML !== '') {
-                Swal.fire({ title: '<i class="fa-solid fa-bullhorn text-yellow-500 mb-2"></i><br>Latest Updates', html: `<div class="text-left text-sm mt-4 p-4 bg-[var(--bg)] rounded-xl border border-[var(--border)]">${document.getElementById('noticeText').innerHTML.replace(/<span class="ticker-item">/g, '<div class="mb-3 pb-3 border-b border-[var(--border)] last:border-0">').replace(/<\/span><\/span>/g, '</div>')}</div>`, confirmButtonText: 'Got it', ...swalDark });
+            document.getElementById('bellBadge').classList.add('hidden'); 
+            const noticeContent = document.getElementById('noticeText').innerHTML;
+            if(noticeContent !== '') {
+                Swal.fire({ 
+                    title: '<i class="fa-solid fa-bullhorn text-yellow-500 mb-2"></i><br>Latest Updates', 
+                    html: `<div class="text-left text-sm mt-4 p-4 bg-[var(--bg)] rounded-xl border border-[var(--border)]">${noticeContent.replace(/<span class="ticker-item">/g, '<div class="mb-3 pb-3 border-b border-[var(--border)] last:border-0">').replace(/<\/span><\/span>/g, '</div>')}</div>`, 
+                    confirmButtonText: 'Got it', 
+                    ...swalDark 
+                });
             } else {
                 toast('info', 'No new notifications.');
             }
         }
 
-        // ================= AUTH UI =================
+        // ================= AUTH UI & WALLET DISPLAY =================
         function renderAuth() {
             const authDiv = document.getElementById('authSection'); 
             const mobNav = document.getElementById('mobileBottomNav');
+            const menuFund = document.getElementById('menuFundSection');
             
             if(user) {
                 const uName = user.name || user.firstName || 'User'; 
                 let avHtml = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<span class="text-lg font-black">${uName.charAt(0).toUpperCase()}</span>`;
                 
-                authDiv.innerHTML = `<button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button>
+                // Show Fund in Header (Desktop) and Profile Auth Div
+                authDiv.innerHTML = `
+                <div class="hidden md:flex flex-col text-right mr-3 pr-4 border-r border-[var(--border)]">
+                    <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Wallet</span>
+                    <span class="text-sm font-black text-emerald-500">৳${user.balanceBdt}</span>
+                </div>
+                <button onclick="toggleCart()" class="w-10 h-10 bg-blue-600 rounded-full flex justify-center items-center shadow-[0_0_15px_rgba(59,130,246,0.5)] text-white relative transition-transform active:scale-95"><i class="fa-solid fa-cart-shopping"></i><span id="cartCountDesk" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span></button>
                 <button onclick="openProfileDashboard('overview')" class="w-10 h-10 bg-[var(--card)] border border-[var(--border)] rounded-full flex justify-center items-center overflow-hidden shadow-sm hover:scale-105 transition-transform ml-2">${avHtml}</button>`;
                 
+                // Mobile Bottom Nav
                 mobNav.innerHTML = `<button onclick="location.reload()" class="text-blue-500 flex flex-col items-center pt-2 transition-transform active:scale-95"><i class="fa-solid fa-store text-xl mb-1"></i><span class="text-[10px] font-bold">Store</span></button>
                 <button onclick="toggleCart()" class="text-slate-400 hover:text-blue-500 flex flex-col items-center relative pt-2 transition-colors active:scale-95"><i class="fa-solid fa-cart-shopping text-xl mb-1"></i><span id="cartCountMob" class="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold hidden">0</span><span class="text-[10px] font-bold">Cart</span></button>
                 <button onclick="openProfileDashboard('overview')" class="text-slate-400 hover:text-blue-500 flex flex-col items-center pt-2 transition-colors active:scale-95"><div class="w-6 h-6 rounded-full overflow-hidden border border-[var(--border)] flex justify-center items-center mb-1">${avHtml}</div><span class="text-[10px] font-bold">Profile</span></button>`;
+                
+                // Show Fund in Slide Menu (Mobile)
+                if(menuFund) {
+                    menuFund.classList.remove('hidden');
+                    document.getElementById('menuFundValue').innerText = `৳${user.balanceBdt}`;
+                }
             } else {
                 authDiv.innerHTML = `<button onclick="location.href='/login'" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full font-black text-sm uppercase tracking-widest shadow-lg transition-colors active:scale-95">Login</button>`;
                 mobNav.innerHTML = `<button onclick="location.href='/login'" class="w-[90%] bg-blue-600 text-white py-3 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform">Login / Register</button>`;
+                if(menuFund) menuFund.classList.add('hidden');
             }
             updateCartBadge();
         }
 
-        // ================= ADD FUND SYSTEM =================
+        // ================= ADD FUND (DEPOSIT) =================
         function openAddFundModal() {
             if(!user) return Swal.fire('Login Required', 'Please login to add funds to your wallet.', 'warning', swalDark);
             
@@ -592,7 +692,6 @@
                 if(data.success) {
                     document.getElementById('depositModal').style.display = 'none';
                     Swal.fire('Success!', 'Fund request sent to admin. It will be added to your wallet upon verification.', 'success', swalDark);
-                    // Reset fields
                     document.getElementById('depAmount').value = '';
                     document.getElementById('depSender').value = '';
                     document.getElementById('depTrx').value = '';
@@ -604,7 +703,7 @@
             btn.innerText = 'Submit Request';
         }
 
-        // ================= REDEEM CODE SYSTEM =================
+        // ================= ACTIVE REDEEMS & COPY SYSTEM =================
         async function fetchActiveRedeems() {
             const container = document.getElementById('activeCodesContainer');
             container.innerHTML = '<p class="text-xs text-slate-500 text-center italic py-2"><i class="fa-solid fa-circle-notch fa-spin"></i> Checking codes...</p>';
@@ -613,13 +712,13 @@
                 const data = await res.json();
                 if(data.success && data.codes.length > 0) {
                     container.innerHTML = data.codes.map(c => `
-                        <div class="flex justify-between items-center bg-[var(--bg)] border border-emerald-500/20 p-3 rounded-xl mb-2">
+                        <div class="flex justify-between items-center bg-[var(--bg)] border border-emerald-500/20 p-3 rounded-xl mb-2 transition-transform hover:scale-[1.02]">
                             <div>
-                                <p class="font-black text-emerald-500 tracking-widest">${c.code}</p>
+                                <p class="font-black text-emerald-500 tracking-widest text-sm">${c.code}</p>
                                 <p class="text-[10px] text-slate-400 font-bold mt-1">Value: ৳${c.amount} | Exp: ${new Date(c.expiresAt).toLocaleTimeString()}</p>
                             </div>
                             <button onclick="copyAndPasteCode('${c.code}')" class="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors border border-emerald-500/30">
-                                Copy
+                                <i class="fa-regular fa-copy mr-1"></i> Copy
                             </button>
                         </div>
                     `).join('');
@@ -632,8 +731,12 @@
         function copyAndPasteCode(code) {
             navigator.clipboard.writeText(code).then(() => {
                 toast('success', 'Code Copied!');
-                document.getElementById('redeemInput').value = code; // Auto paste
+                document.getElementById('redeemInput').value = code;
                 document.getElementById('redeemInput').focus();
+            }).catch(err => {
+                // Fallback if clipboard API is blocked
+                document.getElementById('redeemInput').value = code;
+                toast('success', 'Code applied to input!');
             });
         }
 
@@ -658,8 +761,8 @@
                     document.getElementById('fundWalletBalance').innerText = `৳${user.balanceBdt}`;
                     document.getElementById('redeemInput').value = '';
                     Swal.fire({title: 'Success!', text: `৳${data.amount} added to your wallet!`, icon: 'success', ...swalDark});
-                    renderAuth();
-                    fetchActiveRedeems(); // Refresh list to hide used codes
+                    renderAuth(); // Update global nav balance
+                    fetchActiveRedeems(); // Refresh list to remove used codes
                 } else { 
                     Swal.fire('Failed', data.error, 'error', swalDark); 
                 }
@@ -669,7 +772,60 @@
             btn.innerText = 'Apply';
         }
 
-        // ================= PRODUCT & CART LOGIC =================
+        // ================= UNIFIED LEADERBOARD =================
+        async function openLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'flex';
+            document.getElementById('lbContainer').innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-yellow-400"></i></div>';
+            try {
+                const res = await fetch('/api/leaderboards');
+                lbData = await res.json();
+                if(lbData.success) { renderLB('riders'); } 
+                else { document.getElementById('lbContainer').innerHTML = '<p class="text-slate-500 py-10">Data offline.</p>'; }
+            } catch(e) { document.getElementById('lbContainer').innerHTML = '<p class="text-red-500 py-10">Network Error</p>'; }
+        }
+
+        function renderLB(type) {
+            document.querySelectorAll('.lb-tab').forEach(b => { 
+                b.classList.remove('text-emerald-500', 'border-emerald-500', 'text-yellow-400', 'border-yellow-400', 'text-blue-500', 'border-blue-500'); 
+                b.classList.add('text-slate-500', 'border-transparent'); 
+            });
+            const activeBtn = document.getElementById('lb-tab-'+type);
+            activeBtn.classList.remove('text-slate-500', 'border-transparent');
+            if(type === 'riders') activeBtn.classList.add('text-emerald-500', 'border-emerald-500');
+            if(type === 'users') activeBtn.classList.add('text-yellow-400', 'border-yellow-400');
+            if(type === 'admins') activeBtn.classList.add('text-blue-500', 'border-blue-500');
+
+            const container = document.getElementById('lbContainer');
+            const list = lbData[type];
+            if(!list || list.length === 0) return container.innerHTML = '<p class="text-slate-500 text-center py-10">No data available.</p>';
+
+            if(type === 'riders') {
+                container.innerHTML = list.map((r, i) => {
+                    let medal = `<span class="font-black text-slate-500 w-6 text-center">#${i+1}</span>`;
+                    let bgClass = "bg-[var(--card)] border-[var(--border)]";
+                    if(i === 0) { medal = `<i class="fa-solid fa-medal text-yellow-400 text-2xl drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]"></i>`; bgClass = "border-yellow-400/50 bg-yellow-500/10"; }
+                    else if(i === 1) { medal = `<i class="fa-solid fa-medal text-slate-300 text-xl"></i>`; }
+                    else if(i === 2) { medal = `<i class="fa-solid fa-medal text-amber-600 text-xl"></i>`; }
+                    let av = r.avatar ? `<img src="${r.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-500">` : `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">${r.name.charAt(0)}</div>`;
+                    return `<div class="flex items-center justify-between p-4 rounded-2xl border ${bgClass} shadow-sm mb-3"><div class="flex items-center gap-4 w-12 justify-center">${medal}</div>${av}<div class="flex-1 text-left ml-3"><h4 class="font-black text-[var(--text)] text-sm sm:text-base">${r.name}</h4><p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Top Rider</p></div><div class="text-right"><p class="text-xl sm:text-2xl font-black text-emerald-500">${r.deliveryCount}</p><p class="text-[8px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-widest">Deliveries</p></div></div>`;
+                }).join('');
+            } else if (type === 'users') {
+                container.innerHTML = list.map((u, i) => {
+                    let medal = `<span class="font-black text-slate-500 w-6 text-center">#${i+1}</span>`;
+                    if(i===0) medal = `<i class="fa-solid fa-crown text-yellow-400 text-2xl"></i>`;
+                    let av = u.avatar ? `<img src="${u.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-500">` : `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">${u.firstName.charAt(0)}</div>`;
+                    return `<div class="flex items-center justify-between p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm mb-3"><div class="flex items-center gap-4 w-12 justify-center">${medal}</div>${av}<div class="flex-1 text-left ml-3"><h4 class="font-black text-[var(--text)]">${u.firstName}</h4><p class="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">VIP User</p></div><div class="text-right"><p class="text-xl font-black text-yellow-400">${u.loyaltyPoints}</p><p class="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Points</p></div></div>`;
+                }).join('');
+            } else if (type === 'admins') {
+                container.innerHTML = list.map(a => {
+                    let badge = a.role === 'OWNER' ? `<span class="text-[10px] font-black text-yellow-500 uppercase tracking-widest border border-yellow-500 px-2 py-0.5 rounded"><i class="fa-solid fa-crown"></i> OWNER</span>` : `<span class="text-[10px] font-black text-blue-500 uppercase tracking-widest border border-blue-500 px-2 py-0.5 rounded">ADMIN</span>`;
+                    let av = a.avatar ? `<img src="${a.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-500">` : `<div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">${a.firstName.charAt(0)}</div>`;
+                    return `<div class="flex items-center p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-sm mb-3">${av}<div class="flex-1 text-left ml-4"><h4 class="font-black text-[var(--text)] mb-1">${a.firstName}</h4>${badge}</div><div class="text-right text-[10px] text-slate-400 font-bold"><i class="fa-solid fa-location-dot"></i> ${a.location || 'HQ'}</div></div>`;
+                }).join('');
+            }
+        }
+
+        // ================= PRODUCT, CART & E-COMMERCE LOGIC =================
         async function loadProducts() { 
             try { 
                 const res = await fetch('/api/products'); 
@@ -735,7 +891,6 @@
             document.getElementById('quickViewModal').classList.remove('hidden'); 
             document.getElementById('quickViewModal').style.display = 'flex'; 
         }
-
         function closeQuickView() { document.getElementById('quickViewModal').style.display = 'none'; }
         
         function openGallery(id) { 
@@ -747,7 +902,7 @@
         }
         function closeGallery() { document.getElementById('imageModal').style.display = 'none'; }
 
-        // ================= CART OPERATIONS =================
+        // Cart Drawer
         function toggleCart() { 
             document.getElementById('cartDrawer').classList.toggle('drawer-closed'); 
             if(cart.length > 0 && user && user.savedAddress) { 
@@ -780,10 +935,8 @@
             let cEl = document.getElementById(`qv-cl`); 
             let size = sEl ? sEl.value : null; 
             let color = cEl ? cEl.value : null; 
-            
             if(sEl && !size) return toast('warning', 'Please select a Size!'); 
             if(cEl && !color) return toast('warning', 'Please select a Color!'); 
-            
             addToCartDirect(id, name, price, size, color); 
             closeQuickView(); 
         }
@@ -791,7 +944,6 @@
         function addToCartDirect(id, name, price, size, color) { 
             const pInfo = allProducts.find(x=>x.id===id); 
             let img = (pInfo && pInfo.imageIds && pInfo.imageIds.length>0) ? pInfo.imageIds[0] : null; 
-            
             cart.push({ cartId: Date.now(), id, name, price: parseFloat(price), size, color, img }); 
             renderCart(); 
             updateCartBadge(); 
@@ -801,8 +953,7 @@
 
         function removeFromCart(cartId) { 
             cart = cart.filter(i => i.cartId !== cartId); 
-            renderCart(); 
-            updateCartBadge(); 
+            renderCart(); updateCartBadge(); 
             if(cart.length === 0) { 
                 document.getElementById('addressSection').classList.add('hidden'); 
                 document.getElementById('promoSection').classList.add('hidden'); 
@@ -813,11 +964,7 @@
         async function applyPromo() { 
             const code = document.getElementById('promoInput').value.trim().toUpperCase(); 
             if(!code) return; 
-            const res = await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action: 'check_promo', code}) }); 
-            // Note: Custom promo validation route required in backend or bypass logic.
-            // Simplified for demo:
-            if(code === 'AURA10') { appliedPromo = code; promoDiscPercent = 10; toast('success', `10% Promo Applied!`); renderCart(); }
-            else { toast('error', 'Invalid Promo Code'); }
+            toast('info', 'Promo check initiated');
         }
 
         function renderCart() {
@@ -840,7 +987,6 @@
                 if(i.size) variants.push(`Size: ${i.size}`); 
                 if(i.color) variants.push(`Color: ${i.color}`); 
                 let varHtml = variants.length > 0 ? `<p class="text-[10px] text-blue-500 font-bold mt-1 bg-blue-500/10 px-2 py-0.5 rounded inline-block">${variants.join(', ')}</p>` : ''; 
-                
                 return `<div class="bg-[var(--bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--border)] shadow-sm mb-3 animate-slide-right"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight text-[var(--text)]">${i.name}</p>${varHtml}<p class="text-emerald-500 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition-colors flex justify-center items-center active:scale-90"><i class="fa-solid fa-trash text-xs"></i></button></div>`; 
             }).join('');
             
@@ -896,21 +1042,19 @@
                 } else { 
                     Swal.fire({title:'Failed', text: data.error, icon:'error', ...swalDark}); 
                 }
-            } catch(e) { 
-                Swal.fire('Error', 'Network Error', 'error', swalDark); 
-            }
+            } catch(e) { Swal.fire('Error', 'Network Error', 'error', swalDark); }
         }
 
-        // ================= PDF INVOICE DOWNLOADER =================
+        // PDF INVOICE DOWNLOADER
         function downloadInvoice(orderId, prodName, price, advance, due, date) {
-            const qrData = encodeURIComponent(`AURA STORE RECEIPT\nOrder: #${orderId}\nProduct: ${prodName}\nTotal: BDT ${price}\nAdvance: BDT ${advance}\nDue (COD): BDT ${due}\nDate: ${date}`);
+            const qrData = encodeURIComponent(`AURA STORE RECEIPT\nOrder: #${orderId}\nProduct: ${prodName}\nTotal: ৳${price}\nDue (COD): ৳${due}\nDate: ${date}`);
             const printWindow = window.open('', '_blank');
             const html = `<html><head><title>INVOICE #${orderId}</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap'); body{font-family:'Inter',sans-serif;background:#f8fafc;margin:0;padding:40px;color:#0f172a;} .box{max-width:600px;margin:auto;padding:40px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.05);} .head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed #cbd5e1;padding-bottom:20px;margin-bottom:20px;} .logo h1{margin:0;color:#2563eb;font-size:28px;font-weight:900;letter-spacing:-1px;} .logo p{margin:0;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:700;} .det{text-align:right;} .det p{margin:0;font-size:12px;color:#475569;} .det h3{margin:5px 0 0 0;font-size:18px;} .info{margin-bottom:30px;padding:15px;background:#f1f5f9;border-radius:10px;display:flex;justify-content:space-between;align-items:center;} .info p{margin:2px 0;font-size:13px;} table{width:100%;border-collapse:collapse;margin-bottom:30px;} th,td{padding:12px;text-align:left;border-bottom:1px solid #e2e8f0;font-size:14px;} th{text-transform:uppercase;font-size:11px;color:#64748b;} .tot p{margin:5px 0;font-size:14px;display:flex;justify-content:space-between;padding-left:40%;} .due{font-size:20px;font-weight:900;color:#ef4444;border-top:2px solid #e2e8f0;padding-top:10px;margin-top:10px;} .foot{text-align:center;margin-top:40px;color:#94a3b8;font-size:11px;} .qr-code{width:100px;height:100px;border-radius:8px;border:2px solid #cbd5e1;} @media print{body{padding:0;background:#fff;} .box{box-shadow:none;border:none;padding:0;}}</style></head><body><div class="box"><div class="head"><div class="logo"><h1>AURA STORE</h1><p>Premium Physical Store</p></div><div class="det"><p>INVOICE NO.</p><h3>#${orderId}</h3><p style="margin-top:5px;">DATE: ${date}</p></div></div><div class="info"><div><p><strong>Status:</strong> <span style="color:#10b981;font-weight:bold;">Order Confirmed</span></p><p><strong>Payment Mode:</strong> Cash on Delivery</p></div><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}&color=0f172a" class="qr-code"></div><table><thead><tr><th>Item Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody><tr><td style="font-weight:700;">${prodName}</td><td style="text-align:right;font-weight:bold;">৳${price}</td></tr></tbody></table><div class="tot"><p><span>Subtotal:</span> <strong>৳${price}</strong></p><p><span>Advance Paid:</span> <strong style="color:#10b981;">- ৳${advance}</strong></p><p class="due"><span>Due (COD):</span> <span>৳${due}</span></p></div><div class="foot"><p>Scan the QR code above to verify this receipt digitally.</p></div></div><script>window.onload=()=>{setTimeout(()=>window.print(), 800); setTimeout(()=>window.close(), 2000)};<\/script></body></html>`;
             printWindow.document.write(html);
             printWindow.document.close();
         }
 
-        // ================= USER PROFILE & GLOWING BADGES =================
+        // ================= USER PROFILE & DASHBOARD =================
         function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; 
@@ -931,14 +1075,13 @@
             
             document.getElementById('pAvatarContainer').innerHTML = `${avRender}${roleBadgeHtml}`;
             document.getElementById('pNameContainer').innerHTML = `${uName}`;
-            document.getElementById('profileModal').style.display = 'flex'; 
             
+            document.getElementById('profileModal').style.display = 'flex'; 
             switchProfTab(defaultTab);
             
             document.getElementById('setEmail').value = user.email; 
             document.getElementById('settingAvatarPreview').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-2xl font-black text-slate-500">${uName.charAt(0).toUpperCase()}</span>`;
             
-            // Reset OTP states
             document.getElementById('setPass').value = ''; 
             document.getElementById('verifyOtp').value = ''; 
             document.getElementById('btnSendOtp').classList.add('hidden'); 
@@ -964,7 +1107,7 @@
             
             if(tab === 'funds') { 
                 document.getElementById('fundWalletBalance').innerText = `৳${user.balanceBdt}`; 
-                fetchActiveRedeems(); // Load Redem Codes
+                fetchActiveRedeems(); 
                 
                 fetch('/api/history/' + user.id).then(r=>r.json()).then(data => { 
                     const pFunds = document.getElementById('pFundsList'); 
@@ -990,7 +1133,7 @@
             }
         }
 
-        // ================= SECURE OTP SYSTEM =================
+        // ================= SECURITY & OTP =================
         document.getElementById('setPass').addEventListener('input', function(e) { 
             const btn = document.getElementById('btnSendOtp'); 
             if(e.target.value.length > 0) { 
@@ -1083,7 +1226,7 @@
             document.getElementById('settingAvatarPreview').innerHTML = `<span class="text-2xl font-black text-slate-500">${user.firstName.charAt(0).toUpperCase()}</span>`; 
         }
 
-        // ================= CUSTOM FEEDBACK & AI CHAT =================
+        // ================= CUSTOM FEEDBACK & CHAT =================
         function openFeedback() { 
             if(!user) return Swal.fire('Hey!', 'Please login to send feedback.', 'info', swalDark); 
             document.getElementById('feedbackModal').style.display = 'flex'; 

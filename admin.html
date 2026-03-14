@@ -63,12 +63,10 @@
         </div>
 
         <div class="flex flex-1 overflow-hidden relative">
-            
             <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-[70] hidden md:hidden" onclick="toggleSidebar()"></div>
             
             <aside id="sidebar" class="fixed inset-y-0 left-0 z-[80] md:relative w-72 glass-panel border-r border-slate-800/80 flex flex-col p-6 space-y-2 overflow-y-auto custom-scrollbar transform transition-transform duration-300 -translate-x-full md:translate-x-0">
                 <button onclick="toggleSidebar()" class="md:hidden absolute top-5 right-5 text-slate-400 text-2xl hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                
                 <div class="hidden md:block mb-10 pl-2">
                     <h2 class="text-2xl font-black text-white" id="panelTitle">AURA ADMIN</h2>
                     <p id="panelRole" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 inline-block mt-1 uppercase">ADMIN</p>
@@ -87,7 +85,6 @@
                     <button onclick="showTab('storectrl', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-store mr-4 w-5"></i> Web Control</button>
                     <button onclick="showTab('config', this)" class="tab-btn owner-tab text-left p-4 rounded-xl font-bold text-yellow-500 hover:text-yellow-400 uppercase text-xs mb-1"><i class="fa-solid fa-gear mr-4 w-5"></i> Owner Info</button>
                 </div>
-                
                 <button onclick="logout()" class="text-left p-4 rounded-xl font-bold text-red-500 hover:bg-red-500/10 uppercase text-xs mt-auto"><i class="fa-solid fa-power-off mr-4 w-5"></i> Logout</button>
             </aside>
             
@@ -95,26 +92,12 @@
                 
                 <div id="statsTab" class="tab-content animate-fade">
                     <div class="flex justify-between items-center mb-8"><h1 class="text-3xl md:text-4xl font-black text-white">Dashboard</h1><button onclick="loadAllData()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>Refresh</button></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div>
-                        <div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-blue-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Users</p><h2 class="text-4xl font-black text-white" id="statUsers">0</h2></div><div class="glass-panel p-8 rounded-[32px] border-l-4 border-l-purple-500"><p class="text-slate-400 font-bold mb-1 uppercase text-xs">Total Orders</p><h2 class="text-4xl font-black text-purple-400" id="statOrders">0</h2></div></div>
                 </div>
 
-                <div id="ordersTab" class="tab-content hidden animate-fade">
-                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Orders</h1>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div>
-                </div>
-
-                <div id="productsTab" class="tab-content hidden animate-fade">
-                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Inventory</h1>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price & Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div>
-                </div>
-
-                <div id="depositsTab" class="tab-content hidden animate-fade">
-                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Fund Deposits</h1>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div>
-                </div>
+                <div id="ordersTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Orders</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Customer</th><th class="p-6">Product</th><th class="p-6">Payment</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminOrderList" class="divide-y divide-slate-800"></tbody></table></div></div>
+                <div id="productsTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Inventory</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Item</th><th class="p-6">Price & Stock</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminProductList" class="divide-y divide-slate-800"></tbody></table></div></div>
+                <div id="depositsTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Fund Deposits</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">User</th><th class="p-6">TrxID</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="depositListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
 
                 <div id="ridersTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Riders Fleet</h1>
@@ -124,47 +107,18 @@
                     <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs tracking-widest uppercase font-black"><th class="p-6">Rider</th><th class="p-6">Method & Number</th><th class="p-6">Amount</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="adminRiderWithdraws" class="divide-y divide-slate-800"></tbody></table></div>
                 </div>
 
-                <div id="usersTab" class="tab-content hidden animate-fade">
-                    <h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div>
-                </div>
+                <div id="usersTab" class="tab-content hidden animate-fade"><h1 class="text-3xl md:text-4xl font-black text-white mb-8">Manage Users</h1><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left min-w-[800px]"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Role</th><th class="p-6">Wallet / VIP</th><th class="p-6 text-right">Actions</th></tr></thead><tbody id="userListBody" class="divide-y divide-slate-800"></tbody></table></div></div>
 
                 <div id="adminsTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-crown mr-3"></i>System Admins</h1>
-                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
-                    <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2>
-                    <div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2><div class="glass-panel rounded-[32px] overflow-x-auto mb-10"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Applicant</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="pendingAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
+                    <h2 class="text-xl font-bold text-white mb-4">Active Admins</h2><div class="glass-panel rounded-[32px] overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-900/80"><tr class="text-slate-400 text-xs uppercase font-black"><th class="p-6">Name & Email</th><th class="p-6">Location</th><th class="p-6 text-right">Action</th></tr></thead><tbody id="activeAdminBody" class="divide-y divide-slate-800"></tbody></table></div>
                 </div>
 
                 <div id="storectrlTab" class="tab-content hidden animate-fade">
                     <h1 class="text-3xl md:text-4xl font-black text-yellow-400 mb-8"><i class="fa-solid fa-store mr-3"></i>Web Controls</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="glass-panel p-6 rounded-[32px]">
-                            <h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3>
-                            <p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p>
-                            <button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button>
-                        </div>
-                        <div class="glass-panel p-6 rounded-[32px]">
-                            <h3 class="text-xl font-black text-white mb-4">Notice Board</h3>
-                            <input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm">
-                            <div class="flex gap-2">
-                                <button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1">Publish</button>
-                                <button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm">Clear All</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-6 rounded-[32px]">
-                        <h3 class="text-xl font-black text-white mb-4">Add Product</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                            <input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                            <input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                            <input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                            <input type="text" id="pImage" placeholder="Image Base64 URL" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none">
-                        </div>
-                        <button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full">Upload Product</button>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"><div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Maintenance Mode</h3><p class="text-sm text-slate-400 mb-4">Turn off the main website temporarily.</p><button onclick="ownerAction('toggle_maintenance')" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-sm w-full"><i class="fa-solid fa-power-off mr-2"></i> Toggle Power</button></div><div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Notice Board</h3><input type="text" id="noticeText" placeholder="Enter Notice Text" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none focus:border-blue-500 mb-3 text-sm"><div class="flex gap-2"><button onclick="ownerAction('add_notice')" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm flex-1">Publish</button><button onclick="ownerAction('clear_notices')" class="bg-slate-700 text-red-400 px-4 py-3 rounded-xl font-bold text-sm">Clear All</button></div></div></div>
+                    <div class="glass-panel p-6 rounded-[32px]"><h3 class="text-xl font-black text-white mb-4">Add Product</h3><div class="grid grid-cols-2 gap-4 mb-4"><input type="text" id="pName" placeholder="Product Name" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="text" id="pCat" placeholder="Category" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="number" id="pPrice" placeholder="Price (BDT)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="number" id="pStock" placeholder="Stock" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"><input type="text" id="pImage" placeholder="Image Base64 URL" class="col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-xl text-white outline-none"></div><button onclick="ownerAction('add_product')" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm w-full">Upload Product</button></div>
                 </div>
 
                 <div id="configTab" class="tab-content hidden animate-fade max-w-2xl">
@@ -246,9 +200,7 @@
             Swal.fire({title: 'Submitting...', didOpen: ()=>Swal.showLoading(), ...swalDark});
             const res = await fetch('/api/admin/register/verify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, email, password: pass, location: tempRegLocation, otp}) });
             const data = await res.json();
-            if(data.success) {
-                Swal.fire('Application Sent!', 'Please wait for Owner approval via Telegram or Dashboard.', 'success', swalDark).then(()=>toggleAuthForm());
-            } else { Swal.fire('Error', data.error, 'error', swalDark); }
+            if(data.success) { Swal.fire('Application Sent!', 'Wait for Owner approval.', 'success', swalDark).then(()=>toggleAuthForm()); } else { Swal.fire('Error', data.error, 'error', swalDark); }
         }
 
         async function checkAuth() { 
@@ -267,12 +219,7 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); 
             document.getElementById(tabId + 'Tab').classList.remove('hidden'); 
             if(btnElement) btnElement.classList.add('active'); 
-            
-            // Auto close sidebar on mobile
-            if(window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-                document.getElementById('sidebarOverlay').classList.add('hidden');
-            }
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         }
 
         function logout() { sessionStorage.clear(); location.reload(); }
@@ -284,13 +231,13 @@
         }
 
         async function saveStoreConfig() {
-            const data = { email: adminEmail, password: adminPass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
+            const data = { password: adminPass, ownerName: document.getElementById('cfgName').value, ownerBio: document.getElementById('cfgBio').value, ownerPhone: document.getElementById('cfgPhone').value, fbLink: document.getElementById('cfgFb').value, tgLink: document.getElementById('cfgTg').value };
             await fetch('/api/admin/store-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             Swal.fire({toast:true, position:'top-end', icon:'success', title:'Config Updated', ...swalDark, showConfirmButton:false, timer:2000});
         }
         
         async function ownerAction(action) {
-            let body = { email: adminEmail, password: adminPass, action };
+            let body = { password: adminPass, action };
             if(action === 'add_notice') body.text = document.getElementById('noticeText').value;
             if(action === 'add_product') { body.pName = document.getElementById('pName').value; body.pCat = document.getElementById('pCat').value; body.pPrice = document.getElementById('pPrice').value; body.pStock = document.getElementById('pStock').value; body.pImage = document.getElementById('pImage').value; }
             await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
@@ -330,11 +277,11 @@
                     document.getElementById('pendingAdminBody').innerHTML = data.pendingAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-blue-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400"><i class="fa-solid fa-location-dot"></i> ${a.location || 'N/A'}</td><td class="p-6 text-right"><button onclick="adminAction('approve_admin', ${a.id})" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded mr-2 font-bold text-xs hover:bg-emerald-500 hover:text-white transition-colors">Approve</button><button onclick="adminAction('reject_admin', ${a.id})" class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">Reject</button></td></tr>`).join('') || `<tr><td colspan="3" class="p-6 text-center text-slate-500">No pending requests.</td></tr>`;
                     document.getElementById('activeAdminBody').innerHTML = data.activeAdmins.map(a => `<tr class="table-row-hover"><td class="p-6 font-bold text-white">${a.firstName}<br><span class="text-xs text-slate-400 font-normal">${a.email}</span></td><td class="p-6 text-xs text-slate-400">${a.location || 'Owner Panel Access'}</td><td class="p-6 text-right">${a.role !== 'OWNER' ? `<button onclick="adminAction('delete_admin', ${a.id})" class="bg-red-500/10 text-red-400 p-2 rounded hover:bg-red-500 hover:text-white transition-colors" title="Revoke Role"><i class="fa-solid fa-trash"></i></button>`: '<span class="text-xs font-bold text-yellow-500">OWNER</span>'}</td></tr>`).join('');
                 }
-            } catch(e) { console.error("Failed to load admin data"); }
+            } catch(e) {}
         }
 
         async function actionAPI(action, id, valParam = null) {
-            let body = { email: adminEmail, password: adminPass, action, id };
+            let body = { password: adminPass, action, id };
             if (valParam) {
                 if(action === 'update_balance') {
                     const { value: amt } = await Swal.fire({ title: 'Update Wallet Balance', input: 'number', confirmButtonText: 'Update', ...swalDark });
@@ -348,7 +295,7 @@
 
         async function adminAction(action, id) {
             if(!confirm('Are you sure you want to modify this admin?')) return;
-            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: adminEmail, password: adminPass, action, id}) });
+            await fetch('/api/admin/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: adminPass, action, id}) });
             loadAllData();
         }
 

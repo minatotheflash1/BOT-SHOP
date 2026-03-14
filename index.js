@@ -90,13 +90,13 @@ app.get('/api/store-config', async (req, res) => {
         let conf = await prisma.storeConfig.findUnique({ where: { id: 1 } }); 
         if (!conf) { 
             conf = await prisma.storeConfig.create({ 
-                data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com", tgLink: "https://t.me/minato_namikaze143" } 
+                data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com/yours.ononto", tgLink: "https://t.me/minato_namikaze143" } 
             }); 
         } 
         const admins = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } }, select: { firstName: true, location: true, email: true, phone: true, avatar: true, role: true } }); 
         res.json({ success: true, owner: conf, admins: admins }); 
     } catch(e) {
-        res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: 'https://www.facebook.com', tgLink: 'https://t.me/minato_namikaze143' }, admins: [] });
+        res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: 'https://www.facebook.com/yours.ononto', tgLink: 'https://t.me/minato_namikaze143' }, admins: [] });
     }
 });
 

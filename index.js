@@ -16,6 +16,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.set('trust proxy', true);
 
+// Owner Configs
 const ADMIN_ID = process.env.ADMIN_ID; 
 const OWNER_EMAIL = process.env.MAIN_EMAIL || process.env.ADMIN_EMAIL || process.env.EMAIL_USER; 
 const OWNER_PASS = process.env.ADMIN_PASSWORD || 'Ananto01@$';
@@ -57,8 +58,7 @@ const addProductWizard = new Scenes.WizardScene('ADD_PRODUCT_SCENE',
 const addNoticeWizard = new Scenes.WizardScene('ADD_NOTICE_SCENE', (ctx) => { ctx.reply('📢 *Type Notice:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, async (ctx) => { if(ctx.message.text) { await prisma.notice.create({ data: { text: ctx.message.text } }); ctx.reply('✅ *Notice live.*', { parse_mode: 'Markdown' }); } return ctx.scene.leave(); });
 const flashSaleWizard = new Scenes.WizardScene('FLASH_SALE_SCENE', (ctx) => { ctx.reply('⚡ *Duration in HOURS:*', { parse_mode: 'Markdown' }); return ctx.wizard.next(); }, (ctx) => { ctx.wizard.state.hours = parseInt(ctx.message.text); ctx.reply('💰 Discount Percentage:'); return ctx.wizard.next(); }, async (ctx) => { const discount = parseInt(ctx.message.text); const endTime = new Date(); endTime.setHours(endTime.getHours() + ctx.wizard.state.hours); let fs = await prisma.flashSale.findFirst(); if (fs) await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: true, endTime, discountPercent: discount } }); else await prisma.flashSale.create({ data: { id: 1, isActive: true, endTime, discountPercent: discount } }); await prisma.notice.create({ data: { text: `⚡ MEGA FLASH SALE IS LIVE! Get ${discount}% OFF for the next ${ctx.wizard.state.hours} hours!` } }); ctx.reply(`✅ *FLASH SALE ACTIVATED & NOTICE PUBLISHED!*`, { parse_mode: 'Markdown' }); return ctx.scene.leave(); });
 
-const stage = new Scenes.Stage([addProductWizard, addNoticeWizard, flashSaleWizard]); 
-mainBot.use(session()); mainBot.use(stage.middleware());
+const stage = new Scenes.Stage([addProductWizard, addNoticeWizard, flashSaleWizard]); mainBot.use(session()); mainBot.use(stage.middleware());
 
 mainBot.start((ctx) => { 
     if(ctx.from.id.toString() !== ADMIN_ID) return; 
@@ -66,11 +66,11 @@ mainBot.start((ctx) => {
     ctx.reply(`🌟 *MASTER CONTROL*\nOwner Authority Granted.\n\n💡 Tip: Use \`/gencode [amount] [quantity]\` to create multiple redeem codes.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [ [{ text: '🛍️ Add Product', callback_data: 'menu_add_product' }, { text: '⚡ Flash Sale', callback_data: 'menu_flash_sale' }], [{ text: `🛠️ Maintenance Mode: ${mStatus}`, callback_data: 'toggle_maintenance' }], [{ text: '📢 Add Notice', callback_data: 'menu_add_notice' }, { text: '🗑️ Clear Notices', callback_data: 'menu_clear_notices' }] ] } }); 
 });
 
-// 🔥 UNIQUE MULTI-CODE GENERATOR
+// 🔥 STRICT OWNER ONLY GENCODE
 mainBot.command('gencode', async (ctx) => {
-    if(ctx.from.id.toString() !== ADMIN_ID) return;
+    if(ctx.from.id.toString() !== ADMIN_ID) return ctx.reply('❌ Unauthorized Access.');
     const args = ctx.message.text.split(' ');
-    if(args.length < 3) return ctx.reply('❌ Usage: `/gencode [amount] [quantity]`\nExample: `/gencode 50 5` (Creates 5 distinct codes, 50tk each)', {parse_mode: 'Markdown'});
+    if(args.length < 3) return ctx.reply('❌ Usage: `/gencode [amount] [quantity]`\nExample: `/gencode 50 5`', {parse_mode: 'Markdown'});
     
     const amount = parseFloat(args[1]);
     const qty = parseInt(args[2]);
@@ -85,8 +85,8 @@ mainBot.command('gencode', async (ctx) => {
         codesListStr += `\`${code}\`\n`;
     }
     
-    ctx.reply(`🎁 *${qty} Redeem Codes Generated! (৳${amount} each)*\n\n${codesListStr}\n⏳ Expires in: 30 Minutes\n✅ Each code works for 1 person.`, {parse_mode: 'Markdown'});
-    await prisma.notice.create({ data: { text: `🎁 NEW REDEEM CODES DROPPED! Claim your Free ৳${amount} fast! Valid for 30 mins.` } });
+    ctx.reply(`🎁 *${qty} Redeem Codes Generated! (৳${amount} each)*\n\n${codesListStr}\n⏳ Expires in: 30 Minutes`, {parse_mode: 'Markdown'});
+    await prisma.notice.create({ data: { text: `🎁 NEW REDEEM CODES DROPPED! Check your TG/FB to claim Free ৳${amount} fast! Valid for 30 mins.` } });
 });
 
 mainBot.action('menu_add_product', (ctx) => { ctx.answerCbQuery(); ctx.scene.enter('ADD_PRODUCT_SCENE'); });
@@ -95,27 +95,35 @@ mainBot.action('menu_clear_notices', async (ctx) => { await prisma.notice.delete
 mainBot.action('menu_flash_sale', async (ctx) => { let fs = await prisma.flashSale.findFirst(); if(fs && fs.isActive) { await prisma.flashSale.update({ where: { id: fs.id }, data: { isActive: false } }); ctx.answerCbQuery('Flash Sale Stopped!'); ctx.reply('🛑 Flash Sale OFF.'); } else { ctx.answerCbQuery(); ctx.scene.enter('FLASH_SALE_SCENE'); } });
 mainBot.action('toggle_maintenance', async (ctx) => { isMaintenance = !isMaintenance; ctx.answerCbQuery(`Maintenance ${isMaintenance ? 'ON' : 'OFF'}`); ctx.reply(`Maintenance mode is now ${isMaintenance ? 'ON' : 'OFF'}`);});
 
-logBot.action(/approve_adm_(.+)/, async (ctx) => { await prisma.user.update({ where: { id: parseInt(ctx.match[1]) }, data: { role: 'ADMIN' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *ADMIN APPROVED BY OWNER*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
-logBot.action(/reject_adm_(.+)/, async (ctx) => { await prisma.user.delete({ where: { id: parseInt(ctx.match[1]) } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *ADMIN REJECTED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
+logBot.action(/approve_adm_(.+)/, async (ctx) => { await prisma.user.update({ where: { id: parseInt(ctx.match[1]) }, data: { role: 'ADMIN' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *ADMIN APPROVED BY OWNER*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Admin Approved'); });
+logBot.action(/reject_adm_(.+)/, async (ctx) => { await prisma.user.delete({ where: { id: parseInt(ctx.match[1]) } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *ADMIN REJECTED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Admin Rejected'); });
 logBot.action(/approve_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const dep = await prisma.deposit.findUnique({ where: { id }, include: { user: true } }); if (dep && dep.status === 'PENDING') { await prisma.user.update({ where: { id: dep.userId }, data: { balanceBdt: { increment: dep.amountBdt } } }); await prisma.deposit.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(`✅ Approved: ৳${dep.amountBdt}`); } }); 
 logBot.action(/reject_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const dep = await prisma.deposit.findUnique({ where: { id } }); if(dep && dep.status === 'PENDING') { await prisma.deposit.update({ where: { id }, data: { status: 'REJECTED' } }); ctx.editMessageText(`❌ Rejected Deposit`); } });
 logBot.action(/receive_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'RECEIVED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n📥 *RECEIVED & PACKING*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
 logBot.action(/ship_(.+)/, async (ctx) => { await prisma.purchase.update({ where: { id: parseInt(ctx.match[1]) }, data: { status: 'SHIPPED' } }); ctx.editMessageText(`${ctx.callbackQuery.message.text}\n\n🚚 *SHIPPED TO RIDER*`, { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); });
-logBot.action(/rw_app_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *PAYMENT SENT & APPROVED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); } });
-logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'REJECTED' } }); await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *REJECTED & REFUNDED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery(); } });
+logBot.action(/rw_app_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'APPROVED' } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n✅ *PAYMENT SENT & APPROVED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Withdraw Approved'); } });
+logBot.action(/rw_rej_(.+)/, async (ctx) => { const id = parseInt(ctx.match[1]); const rw = await prisma.riderWithdraw.findUnique({ where: { id } }); if(rw && rw.status === 'PENDING') { await prisma.riderWithdraw.update({ where: { id }, data: { status: 'REJECTED' } }); await prisma.rider.update({ where: { id: rw.riderId }, data: { walletBalance: { increment: rw.amount } } }); ctx.editMessageText(ctx.callbackQuery.message.text + '\n\n❌ *REJECTED & REFUNDED*', { parse_mode: 'Markdown' }).catch(()=>{}); ctx.answerCbQuery('Withdraw Rejected & Refunded'); } });
+
 
 // ================= PUBLIC EXPRESS APIs =================
 app.get('/api/notices', async (req, res) => { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); const notices = await prisma.notice.findMany({ where: { isActive: true } }); res.json(notices); });
 app.get('/api/products', async (req, res) => { const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }); res.json(products); }); 
 app.get('/api/photo/:fileId', async (req, res) => { try { const link = await mainBot.telegram.getFileLink(req.params.fileId); res.redirect(link.href); } catch(e) { res.status(404).send('Not found'); } });
 
+// 🔥 HARDCODED STORE CONFIG & NUMBERS
 app.get('/api/store-config', async (req, res) => { 
     try {
         let conf = await prisma.storeConfig.findUnique({ where: { id: 1 } }); 
-        if (!conf) { conf = await prisma.storeConfig.create({ data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com/yours.ononto", tgLink: "https://t.me/minato_namikaze143" } }); } 
+        if (!conf) { 
+            conf = await prisma.storeConfig.create({ 
+                data: { id: 1, ownerName: "Ononto Hasan", ownerPhone: "+8801846849460", ownerBio: "Store Founder & Freestyle Player", fbLink: "https://www.facebook.com/yours.ononto", tgLink: "https://t.me/minato_namikaze143", bkashNumber: "01846849460", nagadNumber: "01846849460" } 
+            }); 
+        } 
         const admins = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] } }, select: { firstName: true, location: true, email: true, phone: true, avatar: true, role: true } }); 
         res.json({ success: true, owner: conf, admins: admins }); 
-    } catch(e) { res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: '#', tgLink: '#' }, admins: [] }); }
+    } catch(e) {
+        res.json({ success: true, owner: { ownerName: 'Ononto Hasan', ownerBio: 'Store Founder', ownerPhone: '+8801846849460', fbLink: 'https://www.facebook.com/yours.ononto', tgLink: 'https://t.me/minato_namikaze143', bkashNumber: "01846849460", nagadNumber: "01846849460" }, admins: [] });
+    }
 });
 
 app.get('/api/leaderboards', async (req, res) => { 
@@ -129,14 +137,14 @@ app.get('/api/leaderboards', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => { try { const response = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: `You are a helpful Support AI for AURA STORE.` }, { role: 'user', content: req.body.message }] }) }); const data = await response.json(); res.json({ reply: data.choices[0].message.content }); } catch (error) { res.json({ reply: "Our AI is currently taking a break. Please try again in a moment." }); } });
 
-// 🔥 STRICT DAILY REDEEM SYSTEM
+// 🔥 STRICT DAILY REDEEM SYSTEM FIX
 app.post('/api/redeem', async (req, res) => {
     const { userId, code } = req.body;
     try {
         const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
         if (!user) return res.json({success: false, error: 'User not found'});
 
-        // Check Daily Limit
+        // Daily Limit Logic
         if (user.lastRedeemDate) {
             const today = new Date();
             const last = new Date(user.lastRedeemDate);
@@ -148,13 +156,19 @@ app.post('/api/redeem', async (req, res) => {
         const rc = await prisma.redeemCode.findUnique({ where: { code: code.toUpperCase() } });
         if(!rc) return res.json({success: false, error: 'Invalid Code'});
         if(new Date() > rc.expiresAt) return res.json({success: false, error: 'Code has expired'});
-        if(rc.usedBy.length >= rc.maxUses) return res.json({success: false, error: 'Code already used'});
+        if(rc.usedBy.length >= rc.maxUses) return res.json({success: false, error: 'Code usage limit reached'});
         if(rc.usedBy.includes(user.id)) return res.json({success: false, error: 'You have already used this code'});
 
+        // Update Redeem Code usage
         await prisma.redeemCode.update({ where: { id: rc.id }, data: { usedBy: { push: user.id } } });
-        await prisma.user.update({ where: { id: user.id }, data: { balanceBdt: { increment: rc.amount }, lastRedeemDate: new Date() } });
+        
+        // Add Balance and Set Last Redeem Date to Now
+        const updatedUser = await prisma.user.update({ 
+            where: { id: user.id }, 
+            data: { balanceBdt: { increment: rc.amount }, lastRedeemDate: new Date() } 
+        });
 
-        res.json({success: true, amount: rc.amount});
+        res.json({success: true, amount: rc.amount, newBalance: updatedUser.balanceBdt});
     } catch(e) { res.json({success: false, error: 'Server Error'}); }
 });
 
@@ -203,10 +217,15 @@ app.post('/api/admin/action', async (req, res) => {
     res.json({ success: true });
 });
 
+// Update Config with bKash/Nagad
 app.post('/api/admin/store-config', async (req, res) => {
     if (req.body.password !== OWNER_PASS) return res.status(403).json({ error: 'Unauthorized' });
-    const { ownerName, ownerPhone, ownerBio, fbLink, tgLink } = req.body;
-    await prisma.storeConfig.upsert({ where: { id: 1 }, update: { ownerName, ownerPhone, ownerBio, fbLink, tgLink }, create: { id: 1, ownerName, ownerPhone, ownerBio, fbLink, tgLink } });
+    const { ownerName, ownerPhone, ownerBio, fbLink, tgLink, bkashNumber, nagadNumber } = req.body;
+    await prisma.storeConfig.upsert({ 
+        where: { id: 1 }, 
+        update: { ownerName, ownerPhone, ownerBio, fbLink, tgLink, bkashNumber, nagadNumber }, 
+        create: { id: 1, ownerName, ownerPhone, ownerBio, fbLink, tgLink, bkashNumber, nagadNumber } 
+    });
     res.json({ success: true });
 });
 
@@ -227,7 +246,10 @@ app.post('/api/auth/send-profile-otp', async (req, res) => {
         };
         await transporter.sendMail(mailOptions);
         res.json({ success: true });
-    } catch(e) { console.error(e); res.json({ success: false, error: 'Failed to connect to email server.'}); }
+    } catch(e) { 
+        console.error(e); 
+        res.json({ success: false, error: 'Failed to connect to email server.'}); 
+    }
 });
 
 app.post('/api/auth/send-otp', async (req, res) => {
@@ -264,7 +286,11 @@ app.post('/api/rider/orders', async (req, res) => { try { const rider = await pr
 app.post('/api/rider/history', async (req, res) => { try { const rider = await prisma.rider.findUnique({ where: { id: parseInt(req.body.riderId) } }); if(!rider) return res.json({success: false}); const history = await prisma.purchase.findMany({ where: { status: 'DELIVERED', deliveredBy: rider.name }, include: { user: true, product: true }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, history }); } catch(e) { res.json({ success: false }); } });
 app.post('/api/rider/location', async (req, res) => { try { const { riderId, lat, lng } = req.body; await prisma.rider.update({ where: { id: parseInt(riderId) }, data: { lastLat: parseFloat(lat), lastLng: parseFloat(lng), lastLocUpdate: new Date() } }); res.json({success: true}); } catch(e) { res.json({success: false}); } });
 
-app.get('/reset-password', (req, res) => { const token = req.query.token; if(!token) return res.send("Invalid Link"); res.send(`<!DOCTYPE html><html class="dark"><head><title>Reset Password</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-slate-950 flex justify-center items-center h-screen font-sans"><div class="bg-slate-900/80 p-10 rounded-3xl w-full max-w-md border border-slate-800 shadow-[0_0_50px_rgba(59,130,246,0.2)] text-center backdrop-blur-xl"><div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-6 shadow-[0_0_20px_rgba(59,130,246,0.5)]">🔒</div><h2 class="text-3xl font-black text-white mb-2">New Password</h2><p class="text-slate-400 text-sm mb-8">Secure your AURA STORE account.</p><input type="password" id="pass" placeholder="Enter new password" class="w-full bg-slate-950 border border-slate-700 text-white px-5 py-4 rounded-xl font-bold mb-6 outline-none focus:border-blue-500 transition-colors"><button onclick="savePass()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-500 transition-transform active:scale-95 shadow-lg uppercase tracking-widest">Confirm & Login</button></div><script>async function savePass(){ const newPassword = document.getElementById('pass').value; if(!newPassword) return; const res = await fetch('/api/auth/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token: '${token}', newPassword}) }); const data = await res.json(); if(data.success){ Swal.fire({title:'Success!', text:'Password Updated.', icon:'success', background:'#0f172a', color:'#fff', confirmButtonColor:'#3b82f6'}).then(()=>window.location.href='/login'); } else { Swal.fire({title:'Error', text:data.error, icon:'error', background:'#0f172a', color:'#fff'}); } }</script></body></html>`); });
+app.get('/reset-password', (req, res) => {
+    const token = req.query.token;
+    if(!token) return res.send("Invalid Link");
+    res.send(`<!DOCTYPE html><html class="dark"><head><title>Reset Password</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script></head><body class="bg-slate-950 flex justify-center items-center h-screen font-sans"><div class="bg-slate-900/80 p-10 rounded-3xl w-full max-w-md border border-slate-800 shadow-[0_0_50px_rgba(59,130,246,0.2)] text-center backdrop-blur-xl"><div class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-2xl mb-6 shadow-[0_0_20px_rgba(59,130,246,0.5)]">🔒</div><h2 class="text-3xl font-black text-white mb-2">New Password</h2><p class="text-slate-400 text-sm mb-8">Secure your AURA STORE account.</p><input type="password" id="pass" placeholder="Enter new password" class="w-full bg-slate-950 border border-slate-700 text-white px-5 py-4 rounded-xl font-bold mb-6 outline-none focus:border-blue-500 transition-colors"><button onclick="savePass()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-500 transition-transform active:scale-95 shadow-lg uppercase tracking-widest">Confirm & Login</button></div><script>async function savePass(){ const newPassword = document.getElementById('pass').value; if(!newPassword) return; const res = await fetch('/api/auth/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token: '${token}', newPassword}) }); const data = await res.json(); if(data.success){ Swal.fire({title:'Success!', text:'Password Updated.', icon:'success', background:'#0f172a', color:'#fff', confirmButtonColor:'#3b82f6'}).then(()=>window.location.href='/login'); } else { Swal.fire({title:'Error', text:data.error, icon:'error', background:'#0f172a', color:'#fff'}); } }</script></body></html>`);
+});
 
 app.get('/manifest.json', (req, res) => res.sendFile(__dirname + '/manifest.json'));
 app.get('/sw.js', (req, res) => res.sendFile(__dirname + '/sw.js'));

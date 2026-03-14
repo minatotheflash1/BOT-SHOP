@@ -72,10 +72,9 @@
         .variant-select { background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; width: 100%; transition: 0.3s; cursor: pointer; }
         .variant-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-        /* 🔥 SLOWER TICKER ANIMATION */
+        /* 🔥 SLOWER TICKER ANIMATION (35s) */
         .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #0f172a, #1e293b); border-bottom: 1px solid #3b82f6; display: flex; align-items: center; height: 40px; position: relative; z-index: 40; }
         .ticker-title { background: #3b82f6; color: white; font-weight: 900; padding: 0 20px; height: 100%; display: flex; align-items: center; z-index: 10; position: relative; box-shadow: 5px 0 15px rgba(0,0,0,0.5); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-        /* 15s was too fast, updated to 35s */
         .ticker-move { display: inline-block; white-space: nowrap; padding-left: 100%; animation: tickerAnim 35s linear infinite; }
         .ticker-move:hover { animation-play-state: paused; cursor: default; }
         .ticker-item { margin-right: 50px; font-weight: bold; color: #e2e8f0; font-size: 13px; letter-spacing: 1px; display: inline-block; }
@@ -173,7 +172,7 @@
             <i class="fa-solid fa-wallet absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-2 mt-2">
+        <div class="flex-1 overflow-y-auto p-4 space-y-2 mt-2 custom-scrollbar">
             <button onclick="location.reload()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-house mr-3 text-blue-500"></i> Storefront</button>
             <button onclick="toggleMobileMenu(); openAddFundModal()" class="w-full text-left p-4 rounded-xl font-bold text-emerald-500 hover:bg-emerald-500/10 transition-colors border border-emerald-500/20"><i class="fa-solid fa-money-bill-transfer mr-3"></i> Add Fund to Wallet</button>
             <button onclick="toggleMobileMenu(); openLeaderboard()" class="w-full text-left p-4 rounded-xl font-bold text-[var(--text)] hover:bg-[var(--bg)] transition-colors"><i class="fa-solid fa-trophy mr-3 text-yellow-400"></i> Top Performers</button>
@@ -188,7 +187,7 @@
     </div>
 
     <button onclick="openAdminInfo()" id="btnAdminInfo" class="fab animate-slide-up hidden md:flex" title="Admin Support & Info"><i class="fa-solid fa-id-badge text-xl"></i></button>
-    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-headset text-xl"></i></button>
+    <button onclick="toggleChat()" id="btnChat" class="fab animate-slide-up" title="AI Support Chat"><i class="fa-solid fa-robot text-xl"></i></button>
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="btnScrollTop" class="fab hover:bg-blue-500"><i class="fa-solid fa-arrow-up"></i></button>
 
     <div id="chatWindow">
@@ -494,8 +493,6 @@
         let bKashNum = '';
         let nagadNum = '';
         let currentCategory = 'All';
-        let showOnlyWishlist = false;
-        let wishlist = [];
 
         // ================= SYSTEM INIT & THEME =================
         function applyTheme() { 
@@ -734,7 +731,6 @@
                 document.getElementById('redeemInput').value = code;
                 document.getElementById('redeemInput').focus();
             }).catch(err => {
-                // Fallback if clipboard API is blocked
                 document.getElementById('redeemInput').value = code;
                 toast('success', 'Code applied to input!');
             });
@@ -761,8 +757,8 @@
                     document.getElementById('fundWalletBalance').innerText = `৳${user.balanceBdt}`;
                     document.getElementById('redeemInput').value = '';
                     Swal.fire({title: 'Success!', text: `৳${data.amount} added to your wallet!`, icon: 'success', ...swalDark});
-                    renderAuth(); // Update global nav balance
-                    fetchActiveRedeems(); // Refresh list to remove used codes
+                    renderAuth();
+                    fetchActiveRedeems(); 
                 } else { 
                     Swal.fire('Failed', data.error, 'error', swalDark); 
                 }
@@ -825,7 +821,16 @@
             }
         }
 
-        // ================= PRODUCT, CART & E-COMMERCE LOGIC =================
+        // ================= PRODUCT, CART & SCRAPED IMAGE FIX =================
+        
+        // Helper function to resolve image URL correctly
+        function getImgSrc(imgId) {
+            if (!imgId) return '';
+            // If it's a direct URL (from the Scraper), return as is. Otherwise use Telegram API format.
+            if (imgId.startsWith('http')) return imgId; 
+            return `/api/photo/${imgId}`; 
+        }
+
         async function loadProducts() { 
             try { 
                 const res = await fetch('/api/products'); 
@@ -860,7 +865,9 @@
             if(list.length === 0) return container.innerHTML = '<div class="col-span-full text-center text-slate-500 font-bold py-10">No items found.</div>';
             
             container.innerHTML = list.map((p, index) => {
-                let imgHtml = (p.imageIds && p.imageIds.length > 0) ? `<img src="/api/photo/${p.imageIds[0]}" onclick="openQuickView(${p.id})" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex justify-center items-center"><i class="fa-solid fa-box text-3xl text-slate-400"></i></div>`;
+                let resolvedImgSrc = (p.imageIds && p.imageIds.length > 0) ? getImgSrc(p.imageIds[0]) : '';
+                let imgHtml = resolvedImgSrc ? `<img src="${resolvedImgSrc}" onclick="openQuickView(${p.id})" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500">` : `<div class="w-full h-full flex justify-center items-center"><i class="fa-solid fa-box text-3xl text-slate-400"></i></div>`;
+                
                 return `<div class="product-card p-3 md:p-4 flex flex-col justify-between relative rounded-2xl animate-slide-up shadow-sm" style="animation-delay: ${(index*0.05)>0.5?0.5:(index*0.05)}s; opacity: 0;">
                     <div>
                         <div class="w-full h-40 md:h-48 bg-[var(--bg)] rounded-xl mb-3 overflow-hidden relative shadow-inner">${imgHtml}</div>
@@ -879,7 +886,9 @@
         function openQuickView(id) { 
             const p = allProducts.find(x=>x.id===id); 
             if(!p) return; 
-            const img = (p.imageIds && p.imageIds.length>0) ? `<img src="/api/photo/${p.imageIds[0]}" onclick="openGallery(${p.id})" class="max-w-full max-h-full object-contain rounded-xl drop-shadow-2xl cursor-pointer">` : ''; 
+            
+            let resolvedImgSrc = (p.imageIds && p.imageIds.length > 0) ? getImgSrc(p.imageIds[0]) : '';
+            const img = resolvedImgSrc ? `<img src="${resolvedImgSrc}" onclick="openGallery(${p.id})" class="max-w-full max-h-full object-contain rounded-xl drop-shadow-2xl cursor-pointer">` : ''; 
             
             let sizeOpts = p.sizes && p.sizes.length > 0 ? `<select id="qv-sz" class="variant-select mb-3"><option value="">Select Size</option>${p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>` : '';
             let colorOpts = p.colors && p.colors.length > 0 ? `<select id="qv-cl" class="variant-select"><option value="">Select Color</option>${p.colors.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>` : '';
@@ -896,8 +905,13 @@
         function openGallery(id) { 
             const p = allProducts.find(x => x.id === id); 
             if(!p || !p.imageIds) return; 
-            document.getElementById('galleryMainImg').src = `/api/photo/${p.imageIds[0]}`; 
-            document.getElementById('galleryThumbnails').innerHTML = p.imageIds.map(img => `<img src="/api/photo/${img}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer">`).join(''); 
+            
+            document.getElementById('galleryMainImg').src = getImgSrc(p.imageIds[0]); 
+            document.getElementById('galleryThumbnails').innerHTML = p.imageIds.map(img => {
+                let resolvedUrl = getImgSrc(img);
+                return `<img src="${resolvedUrl}" onclick="document.getElementById('galleryMainImg').src=this.src" class="w-16 h-16 object-cover rounded-lg border-2 border-transparent hover:border-blue-500 cursor-pointer">`;
+            }).join(''); 
+            
             document.getElementById('imageModal').style.display = 'flex'; 
         }
         function closeGallery() { document.getElementById('imageModal').style.display = 'none'; }
@@ -982,11 +996,14 @@
             let sum = 0; 
             container.innerHTML = cart.map(i => { 
                 sum += i.price; 
-                let imgHtml = i.img ? `<img src="/api/photo/${i.img}" class="w-12 h-12 object-cover rounded-lg border border-[var(--border)]">` : `<div class="w-12 h-12 bg-[var(--bg)] rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`; 
+                let resolvedImgSrc = getImgSrc(i.img);
+                let imgHtml = i.img ? `<img src="${resolvedImgSrc}" class="w-12 h-12 object-cover rounded-lg border border-[var(--border)]">` : `<div class="w-12 h-12 bg-[var(--bg)] rounded-lg flex items-center justify-center text-blue-500"><i class="fa-solid fa-box"></i></div>`; 
+                
                 let variants = []; 
                 if(i.size) variants.push(`Size: ${i.size}`); 
                 if(i.color) variants.push(`Color: ${i.color}`); 
                 let varHtml = variants.length > 0 ? `<p class="text-[10px] text-blue-500 font-bold mt-1 bg-blue-500/10 px-2 py-0.5 rounded inline-block">${variants.join(', ')}</p>` : ''; 
+                
                 return `<div class="bg-[var(--bg)] p-4 rounded-xl flex justify-between items-center border border-[var(--border)] shadow-sm mb-3 animate-slide-right"><div class="flex items-center gap-3">${imgHtml}<div><p class="font-bold text-sm leading-tight text-[var(--text)]">${i.name}</p>${varHtml}<p class="text-emerald-500 font-black mt-1">৳${i.price}</p></div></div><button onclick="removeFromCart(${i.cartId})" class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full transition-colors flex justify-center items-center active:scale-90"><i class="fa-solid fa-trash text-xs"></i></button></div>`; 
             }).join('');
             
@@ -1054,7 +1071,7 @@
             printWindow.document.close();
         }
 
-        // ================= USER PROFILE & DASHBOARD =================
+        // ================= USER PROFILE DASHBOARD =================
         function openProfileDashboard(defaultTab = 'overview') {
             if(!user) return location.href='/login';
             const uName = user.name || user.firstName || 'User'; 
@@ -1082,6 +1099,7 @@
             document.getElementById('setEmail').value = user.email; 
             document.getElementById('settingAvatarPreview').innerHTML = base64Avatar ? `<img src="${base64Avatar}" class="w-full h-full object-cover">` : `<span class="text-2xl font-black text-slate-500">${uName.charAt(0).toUpperCase()}</span>`;
             
+            // Reset OTP states
             document.getElementById('setPass').value = ''; 
             document.getElementById('verifyOtp').value = ''; 
             document.getElementById('btnSendOtp').classList.add('hidden'); 
